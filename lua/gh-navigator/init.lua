@@ -11,6 +11,20 @@ function M.setup()
     return
   end
 
+  vim.api.nvim_create_user_command('GHBlame', function(command)
+    local filename = command.args
+    if filename == '' then
+      filename = vim.fn.expand('%')
+    end
+
+    if command.range == 0 then
+      utils.open_blame(filename)
+    else
+      filename = filename .. '#' .. 'L' .. command.line1 .. '-' .. 'L' .. command.line2
+      utils.open_blame(filename)
+    end
+  end, { force = true, range = true, nargs = '?', desc = 'Open blame in GitHub' })
+
   vim.api.nvim_create_user_command('GHFile', function(command)
     local filename = command.args
     if filename == '' then

@@ -4,6 +4,10 @@
 
 local M = {}
 
+function M.open_blame(filename)
+  vim.ui.open(M.blame_url(filename))
+end
+
 function M.open_file(filename)
   local gh_cmd = 'gh browse ' .. filename
   vim.fn.system(gh_cmd)
@@ -53,12 +57,25 @@ function M.select_pr(prs)
   end)
 end
 
+function M.blame_url(filename)
+  local blame_url = M.repo_url() .. '/blame/main/' .. filename
+  vim.print(blame_url)
+  return blame_url
+end
+
+function M.repo_url()
+  local gh_cmd = 'gh repo view --json url'
+  local result = vim.fn.system(gh_cmd)
+
+  return vim.json.decode(result).url
+end
+
 function M.open_repo()
   local gh_cmd = 'gh repo view --json url'
   local result = vim.fn.system(gh_cmd)
 
   if not string.find(result, 'no git remotes found') then
-    vim.ui.open(vim.json.decode(result).url)
+    vim.ui.open(M.repo_url())
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
   end
