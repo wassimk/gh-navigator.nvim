@@ -4,33 +4,9 @@
 
 local M = {}
 
-function M.gh_cli_installed()
-  if vim.fn.executable('gh') == 0 then
-    vim.notify('gh-navigator requires the GitHub CLI to be installed', vim.log.ERROR, { title = 'gh-navigator' })
-    return false
-  else
-    return true
-  end
-end
-
-function M.in_github_repo()
-  if vim.fn.system('gh repo view --json url 2>/dev/null') == '' then
-    vim.notify('gh-navigator expects to be in a GitHub repository', vim.log.ERROR, { title = 'gh-navigator' })
-    return false
-  else
-    return true
-  end
-end
-
-function M.open_repo()
-  local gh_cmd = 'gh repo view --json url'
-  local result = vim.fn.system(gh_cmd)
-
-  if not string.find(result, 'no git remotes found') then
-    vim.ui.open(vim.json.decode(result).url)
-  else
-    vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
-  end
+function M.open_file(filename)
+  local gh_cmd = 'gh browse ' .. filename
+  vim.fn.system(gh_cmd)
 end
 
 function M.open_pr_by_number(number)
@@ -77,4 +53,32 @@ function M.select_pr(prs)
   end)
 end
 
+function M.open_repo()
+  local gh_cmd = 'gh repo view --json url'
+  local result = vim.fn.system(gh_cmd)
+
+  if not string.find(result, 'no git remotes found') then
+    vim.ui.open(vim.json.decode(result).url)
+  else
+    vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
+  end
+end
+
+function M.gh_cli_installed()
+  if vim.fn.executable('gh') == 0 then
+    vim.notify('gh-navigator requires the GitHub CLI to be installed', vim.log.ERROR, { title = 'gh-navigator' })
+    return false
+  else
+    return true
+  end
+end
+
+function M.in_github_repo()
+  if vim.fn.system('gh repo view --json url 2>/dev/null') == '' then
+    vim.notify('gh-navigator expects to be in a GitHub repository', vim.log.ERROR, { title = 'gh-navigator' })
+    return false
+  else
+    return true
+  end
+end
 return M

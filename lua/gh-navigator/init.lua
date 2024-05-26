@@ -11,6 +11,15 @@ function M.setup()
     return
   end
 
+  vim.api.nvim_create_user_command('GHFile', function(command)
+    local arg = command.args
+    if arg == '' then
+      arg = vim.fn.expand('%')
+    end
+
+    utils.open_file(arg)
+  end, { force = true, nargs = '?', desc = 'Open file in GitHub' })
+
   vim.api.nvim_create_user_command('GHPR', function(command)
     local arg = command.args
     if arg == '' then
