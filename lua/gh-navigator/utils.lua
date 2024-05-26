@@ -22,6 +22,17 @@ function M.in_github_repo()
   end
 end
 
+function M.open_repo()
+  local gh_cmd = 'gh repo view --json url'
+  local result = vim.fn.system(gh_cmd)
+
+  if not string.find(result, 'no git remotes found') then
+    vim.ui.open(vim.json.decode(result).url)
+  else
+    vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
+  end
+end
+
 function M.open_pr_by_number(number)
   local gh_cmd = 'gh pr view ' .. number .. ' --json url'
   local result = vim.fn.system(gh_cmd)
