@@ -38,6 +38,4 @@ function M.setup()
   end, { force = true, desc = 'Open GitHub repository' })
 end
 
-M.setup()
-
 return M
