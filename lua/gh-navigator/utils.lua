@@ -57,9 +57,14 @@ function M.select_pr(prs)
   end)
 end
 
+function M.current_branch()
+  return vim.trim(vim.fn.system('git branch --show-current'))
+end
+
 function M.blame_url(filename)
-  local blame_url = M.repo_url() .. '/blame/main/' .. filename
-  vim.print(blame_url)
+  local current_branch = M.current_branch()
+  local blame_url = M.repo_url() .. '/blame/' .. current_branch .. '/' .. filename
+
   return blame_url
 end
 
