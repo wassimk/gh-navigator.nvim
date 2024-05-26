@@ -11,18 +11,22 @@ function M.setup()
     return
   end
 
-  vim.api.nvim_create_user_command('GH', function(command)
-    local arg = command.args
-    if arg == '' then
-      arg = vim.fn.expand('<cword>')
-    end
+  vim.api.nvim_create_user_command(
+    'GH',
+    function(command)
+      local arg = command.args
+      if arg == '' then
+        arg = vim.fn.expand('<cword>')
+      end
 
-    if utils.is_commit(arg) then
-      utils.open_commit(arg)
-    else
-      utils.open_pr(arg)
-    end
-  end, { force = true, nargs = '?', desc = 'Heuristically open commit sha or PR in GitHub' })
+      if utils.is_commit(arg) then
+        utils.open_commit(arg)
+      else
+        utils.open_pr(arg)
+      end
+    end,
+    { force = true, nargs = '?', desc = 'Heuristically open commit sha or PR in GitHub using number or search term(s)' }
+  )
 
   vim.api.nvim_create_user_command('GHBlame', function(command)
     local filename = command.args

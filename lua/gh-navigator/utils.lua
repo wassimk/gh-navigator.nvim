@@ -4,53 +4,22 @@
 
 local M = {}
 
-function M.open_blame(filename)
-  vim.ui.open(M.blame_url(filename))
+local function current_branch()
+  return vim.trim(vim.fn.system('git branch --show-current'))
 end
 
-function M.open_commit(sha)
-  local gh_cmd = 'gh browse ' .. sha
-  vim.fn.system(gh_cmd)
-end
-
-function M.open_file(filename)
-  local gh_cmd = 'gh browse ' .. filename
-  vim.fn.system(gh_cmd)
-end
-
-function M.open_pr(number_or_query)
-  if tonumber(number_or_query) then
-    M.open_pr_by_number(number_or_query)
-  else
-    M.open_pr_by_search(number_or_query)
-  end
-end
-
-function M.open_pr_by_number(number)
-  local gh_cmd = 'gh pr view ' .. number .. ' --json url'
+local function repo_url()
+  local gh_cmd = 'gh repo view --json url'
   local result = vim.fn.system(gh_cmd)
 
-  if not string.find(result, 'Could not resolve') then
-    vim.ui.open(vim.json.decode(result).url)
-  else
-    vim.notify('PR #' .. number .. ' not found', vim.log.INFO, { title = 'GHPR' })
-  end
+  return vim.json.decode(result).url
 end
 
-function M.open_pr_by_search(query)
-  local gh_cmd = 'gh pr list --search "' .. query .. '" --state merged --json number,title,author,url'
-  local results = vim.json.decode(vim.fn.system(gh_cmd))
-
-  if vim.tbl_count(results) == 1 then
-    vim.ui.open(results[1].url)
-  elseif vim.tbl_count(results) > 1 then
-    M.ui_select_pr(results)
-  else
-    vim.notify('No PR found for: ' .. query, vim.log.INFO, { title = ':OpenInGHPR' })
-  end
+local function blame_url(filename)
+  return repo_url() .. '/blame/' .. current_branch() .. '/' .. filename
 end
 
-function M.ui_select_pr(prs)
+local function ui_select_pr(prs)
   vim.ui.select(prs, {
     prompt = 'Select a PR:',
     format_item = function(pr)
@@ -70,22 +39,50 @@ function M.ui_select_pr(prs)
   end)
 end
 
-function M.current_branch()
-  return vim.trim(vim.fn.system('git branch --show-current'))
-end
-
-function M.blame_url(filename)
-  local current_branch = M.current_branch()
-  local blame_url = M.repo_url() .. '/blame/' .. current_branch .. '/' .. filename
-
-  return blame_url
-end
-
-function M.repo_url()
-  local gh_cmd = 'gh repo view --json url'
+local function open_pr_by_number(number)
+  local gh_cmd = 'gh pr view ' .. number .. ' --json url'
   local result = vim.fn.system(gh_cmd)
 
-  return vim.json.decode(result).url
+  if not string.find(result, 'Could not resolve') then
+    vim.ui.open(vim.json.decode(result).url)
+  else
+    vim.notify('PR #' .. number .. ' not found', vim.log.INFO, { title = 'GHPR' })
+  end
+end
+
+local function open_pr_by_search(query)
+  local gh_cmd = 'gh pr list --search "' .. query .. '" --state merged --json number,title,author,url'
+  local results = vim.json.decode(vim.fn.system(gh_cmd))
+
+  if vim.tbl_count(results) == 1 then
+    vim.ui.open(results[1].url)
+  elseif vim.tbl_count(results) > 1 then
+    ui_select_pr(results)
+  else
+    vim.notify('No PR found for: ' .. query, vim.log.INFO, { title = ':OpenInGHPR' })
+  end
+end
+
+function M.open_blame(filename)
+  vim.ui.open(blame_url(filename))
+end
+
+function M.open_commit(sha)
+  local gh_cmd = 'gh browse ' .. sha
+  vim.fn.system(gh_cmd)
+end
+
+function M.open_file(filename)
+  local gh_cmd = 'gh browse ' .. filename
+  vim.fn.system(gh_cmd)
+end
+
+function M.open_pr(number_or_query)
+  if tonumber(number_or_query) then
+    open_pr_by_number(number_or_query)
+  else
+    open_pr_by_search(number_or_query)
+  end
 end
 
 function M.open_repo()
@@ -93,7 +90,7 @@ function M.open_repo()
   local result = vim.fn.system(gh_cmd)
 
   if not string.find(result, 'no git remotes found') then
-    vim.ui.open(M.repo_url())
+    vim.ui.open(repo_url())
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
   end
