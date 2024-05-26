@@ -50,7 +50,7 @@ function M.setup()
     else
       utils.open_pr_by_search(arg)
     end
-  end, { force = true, nargs = '?', desc = 'Open PR using number, commit sha, or search term(s)' })
+  end, { force = true, nargs = '?', desc = 'Open PR in GitHub using number, commit sha, or search term(s)' })
 
   vim.api.nvim_create_user_command('GHRepo', function()
     utils.open_repo()
