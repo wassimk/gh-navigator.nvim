@@ -12,13 +12,18 @@ function M.setup()
   end
 
   vim.api.nvim_create_user_command('GHFile', function(command)
-    local arg = command.args
-    if arg == '' then
-      arg = vim.fn.expand('%')
+    local filename = command.args
+    if filename == '' then
+      filename = vim.fn.expand('%')
     end
 
-    utils.open_file(arg)
-  end, { force = true, nargs = '?', desc = 'Open file in GitHub' })
+    if command.range == 0 then
+      utils.open_file(filename)
+    else
+      filename = filename .. ':' .. command.line1 .. '-' .. command.line2
+      utils.open_file(filename)
+    end
+  end, { force = true, range = true, nargs = '?', desc = 'Open file in GitHub' })
 
   vim.api.nvim_create_user_command('GHPR', function(command)
     local arg = command.args
