@@ -8,9 +8,22 @@ function M.open_blame(filename)
   vim.ui.open(M.blame_url(filename))
 end
 
+function M.open_commit(sha)
+  local gh_cmd = 'gh browse ' .. sha
+  vim.fn.system(gh_cmd)
+end
+
 function M.open_file(filename)
   local gh_cmd = 'gh browse ' .. filename
   vim.fn.system(gh_cmd)
+end
+
+function M.open_pr(number_or_query)
+  if tonumber(number_or_query) then
+    M.open_pr_by_number(number_or_query)
+  else
+    M.open_pr_by_search(number_or_query)
+  end
 end
 
 function M.open_pr_by_number(number)
@@ -37,7 +50,7 @@ function M.open_pr_by_search(query)
   end
 end
 
-function M.select_pr(prs)
+function M.ui_select_pr(prs)
   vim.ui.select(prs, {
     prompt = 'Select a PR:',
     format_item = function(pr)
@@ -83,6 +96,16 @@ function M.open_repo()
     vim.ui.open(M.repo_url())
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
+  end
+end
+
+function M.is_commit(arg)
+  local result = vim.fn.system('git rev-parse --verify ' .. arg)
+
+  if string.find(result, 'fatal') then
+    return false
+  else
+    return true
   end
 end
 
