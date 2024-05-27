@@ -51,7 +51,7 @@ I'll also be actively working off the `main` branch, so use versioned releases w
 
 Move the cursor over a sha, pr number, or word and execute the commands. The word under the cursor will be the argument.
 
-You can also call them with an argument. `:GHPR 1234` or `:GHPR [c2d25b3]`.
+You can also call them with an argument. `:GHPR 1234` or `:GHPR c2d25b3` or `GH refactor the actor class`
 
 Most commands accept a range. For example, highlight the lines you want to blame and execute `:GHBlame`.
 
