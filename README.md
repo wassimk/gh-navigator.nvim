@@ -11,7 +11,7 @@ The plugin is mostly a wrapper around the [GitHub CLI](https://cli.github.com/),
 An example of how to setup `gh` for a macOS user is:
 
 ```shell
-brew install cli
+brew install gh
 gh auth login
 ```
 
