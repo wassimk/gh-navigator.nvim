@@ -16,6 +16,7 @@ gh auth login
 ```
 
 If you already have the `gh` tool installed, ensure it's working:
+
 ```shell
 gh auth status
 ```
@@ -27,7 +28,6 @@ Install **gh-navigator** using your plugin manager of choice. For example, here 
 ```lua
 {
   'wassimk/gh-navigator.nvim',
-  cmd = { 'GH', 'GHBlame', 'GHFile', 'GHPR', 'GHRepo' },
   version = "*",
   config = true
 }
