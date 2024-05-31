@@ -31,7 +31,7 @@ function M.setup()
   vim.api.nvim_create_user_command('GHBlame', function(command)
     local filename = command.args
     if filename == '' then
-      filename = vim.fn.expand('%')
+      filename = vim.fn.expand('%:.')
     end
 
     if command.range == 0 then
@@ -45,7 +45,7 @@ function M.setup()
   vim.api.nvim_create_user_command('GHFile', function(command)
     local filename = command.args
     if filename == '' then
-      filename = vim.fn.expand('%')
+      filename = vim.fn.expand('%:.')
     end
 
     if command.range == 0 then
