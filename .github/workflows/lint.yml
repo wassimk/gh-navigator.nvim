@@ -1,0 +1,14 @@
+name: Style checking
+
+on: [push, pull_request]
+
+jobs:
+  stylua:
+    name: stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: JohnnyMorganz/stylua-action@v4
+        with:
+          version: latest
+          args: --color always --check lua/
