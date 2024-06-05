@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: kdheepak/panvimdoc@main
         with:
-          vimdoc: scalpel.nvim
+          vimdoc: gh-navigator.nvim
           version: "NVIM v0.1.0"
           toc: true
           treesitter: true
