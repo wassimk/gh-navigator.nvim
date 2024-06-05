@@ -35,9 +35,7 @@ Install **gh-navigator** using your plugin manager of choice. For example, here 
 }
 ```
 
-Specifying the `cmd` will lazy load the plugin when you first use one of the commands.
-
-I'll also be actively working off the `main` branch, so use versioned releases with the `version` key to avoid unexpected breaking changes.
+I'll also be actively developing this plugin using the `main` branch, so use versioned releases with the `version` key to avoid unexpected breaking changes.
 
 ### Commands
 
@@ -51,7 +49,7 @@ I'll also be actively working off the `main` branch, so use versioned releases w
 
 ### Usage
 
-Move the cursor over a sha, pr number, or word and execute the commands. The word under the cursor will be the argument.
+Move the cursor over a sha, PR number, or word and execute the commands. The word under the cursor will be the argument.
 
 You can also call them with an argument. `:GHPR 1234` or `:GHPR c2d25b3` or `:GH refactor the actor class`
 
