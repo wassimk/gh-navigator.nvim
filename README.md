@@ -2,7 +2,7 @@
 
 This Neovim plugin makes jumping from coding to GitHub as painless as possible.
 
-[![Build](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml/badge.svg)](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml)
+[![build](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml/badge.svg)](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml) ![release](https://img.shields.io/github/v/release/wassimk/gh-navigator.nvim?logo=github)
 
 ## Setup
 
