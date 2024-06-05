@@ -21,7 +21,7 @@ jobs:
       - uses: kdheepak/panvimdoc@main
         with:
           vimdoc: gh-navigator.nvim
-          version: "NVIM v0.1.0"
+          version: "NVIM v0.10.0"
           toc: true
           treesitter: true
           docmappingprojectname: false
