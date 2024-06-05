@@ -42,7 +42,23 @@ function M.setup()
     end
   end, { force = true, range = true, nargs = '?', desc = 'Open blame in GitHub' })
 
+  vim.api.nvim_create_user_command('GHBrowse', function(command)
+    local filename = command.args
+    if filename == '' then
+      filename = vim.fn.expand('%:.')
+    end
+
+    if command.range == 0 then
+      utils.open_file(filename)
+    else
+      filename = filename .. ':' .. command.line1 .. '-' .. command.line2
+      utils.open_file(filename)
+    end
+  end, { force = true, range = true, nargs = '?', desc = 'Browse to file in GitHub' })
+
   vim.api.nvim_create_user_command('GHFile', function(command)
+    vim.deprecate('GHFile', 'GHBrowse', 'v0.2.0', 'gh-navigator', false)
+
     local filename = command.args
     if filename == '' then
       filename = vim.fn.expand('%:.')

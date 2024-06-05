@@ -43,7 +43,7 @@ I'll also be actively developing this plugin using the `main` branch, so use ver
 |---------|:------------|
 | `GH` | Heuristically open commit sha or PR using number or search term(s) |
 | `GHBlame` | Open the current file in blame view |
-| `GHFile` | Open the current file in blob view |
+| `GHBrowse` | Open the current file in blob view |
 | `GHPR` | Open PR by commit SHA, PR number, or search term(s) |
 | `GHRepo` | Open the current repo |
 
