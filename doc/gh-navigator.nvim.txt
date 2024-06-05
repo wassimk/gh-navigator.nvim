@@ -5,6 +5,8 @@ Table of Contents                        *gh-navigator.nvim-table-of-contents*
 
 1. gh-navigator.nvim                     |gh-navigator.nvim-gh-navigator.nvim|
   - Setup                          |gh-navigator.nvim-gh-navigator.nvim-setup|
+  - Commands                    |gh-navigator.nvim-gh-navigator.nvim-commands|
+  - Usage                          |gh-navigator.nvim-gh-navigator.nvim-usage|
 2. Links                                             |gh-navigator.nvim-links|
 
 ==============================================================================
@@ -55,7 +57,7 @@ I’ll also be actively developing this plugin using the `main` branch, so use
 versioned releases with the `version` key to avoid unexpected breaking changes.
 
 
-COMMANDS ~
+COMMANDS                        *gh-navigator.nvim-gh-navigator.nvim-commands*
 
   -----------------------------------------------------------------------
   Command                       Description
@@ -73,7 +75,7 @@ COMMANDS ~
   GHRepo                        Open the current repo
   -----------------------------------------------------------------------
 
-USAGE ~
+USAGE                              *gh-navigator.nvim-gh-navigator.nvim-usage*
 
 Move the cursor over a sha, PR number, or word and execute the commands. The
 word under the cursor will be the argument.
