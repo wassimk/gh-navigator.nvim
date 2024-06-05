@@ -37,7 +37,7 @@ Install **gh-navigator** using your plugin manager of choice. For example, here 
 
 I'll also be actively developing this plugin using the `main` branch, so use versioned releases with the `version` key to avoid unexpected breaking changes.
 
-### Commands
+## Commands
 
 | Command | Description |
 |---------|:------------|
@@ -47,7 +47,7 @@ I'll also be actively developing this plugin using the `main` branch, so use ver
 | `GHPR` | Open PR by commit SHA, PR number, or search term(s) |
 | `GHRepo` | Open the current repo |
 
-### Usage
+## Usage
 
 Move the cursor over a sha, PR number, or word and execute the commands. The word under the cursor will be the argument.
 
