@@ -8,16 +8,18 @@ This Neovim plugin makes jumping from coding to GitHub as painless as possible.
 
 ### Prerequisites
 
-The plugin is mostly a wrapper around the [GitHub CLI](https://cli.github.com/) tool, `gh`, with a few direct calls to `git`. So ensure the `gh` tool is installed and can connect to your GitHub account.
+The plugin primarily acts as a wrapper for the [GitHub CLI](https://cli.github.com/) (`gh`), and also makes a few direct `git` calls. So ensure the `gh` tool is installed and can connect to your GitHub account. 
 
-An example of how to setup `gh` for a macOS user is:
+Here are instructions for macOS users:
+
+1. Install `gh` and connect it to your GitHub account. 
 
 ```shell
 brew install gh
 gh auth login
 ```
 
-If you already have the `gh` tool installed, ensure it's working:
+2. If `gh` is already installed, check it's working with:
 
 ```shell
 gh auth status
@@ -25,7 +27,7 @@ gh auth status
 
 ### Installation
 
-Install **gh-navigator** using your plugin manager of choice. For example, here it is using [lazy.nvim](https://github.com/folke/lazy.nvim).
+Install **gh-navigator** via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
 
 ```lua
 {
@@ -35,23 +37,25 @@ Install **gh-navigator** using your plugin manager of choice. For example, here 
 }
 ```
 
-I'll also be actively developing this plugin using the `main` branch, so use versioned releases with the `version` key to avoid unexpected breaking changes.
-
-## Commands
-
-| Command | Description |
-|---------|:------------|
-| `GH` | Heuristically open commit sha or PR using number or search term(s) |
-| `GHBlame` | Open the current file in blame view |
-| `GHBrowse` | Open the current file in blob view |
-| `GHPR` | Open PR by commit SHA, PR number, or search term(s) |
-| `GHRepo` | Open the current repo |
+> [!IMPORTANT]
+> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
 
 ## Usage
 
-Move the cursor over a sha, PR number, or word and execute the commands. The word under the cursor will be the argument.
+`GH` is the main command, but it accepts different sub-commands:
 
-You can also call them with an argument. `:GHPR 1234` or `:GHPR c2d25b3` or `:GH refactor the actor class`
+### `GH` Command
 
-Most commands accept a range. For example, highlight the lines you want to blame and execute `:GHBlame`.
+Move the cursor over a commit SHA, PR number, or search term and run the `GH` command to open it on GitHub. The term under the cursor will be used as the argument.
 
+### Sub-Commands
+
+| Sub-Command | Description |
+|--------------------|:---------------|
+| `GH blame` | Opens the current file in GitHub's blame view. |
+| `GH browse` | Opens the current file in GitHub's blob view. |
+| `GH pr <arg>` | Opens a PR based on a commit SHA, PR number, or search term (e.g., `GH pr 1234`, `GH pr c2d25b3`, or `GH pr refactor the actor class`). |
+| `GH repo <path>` | Opens a certain path in the current repo on GitHub (e.g., `GH repo issues` opens the repo's issues page). Auto-completion is available for paths such as *issues, pulls, actions, releases*, etc.|
+
+> [!Note]
+> Both `GH browse` and `GH blame` can accept a range. For instance, in visual mode (**V**), select a set of lines and run `GH blame` to open the blame view for that selection.
