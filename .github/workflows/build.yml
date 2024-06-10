@@ -25,7 +25,7 @@ jobs:
           toc: true
           treesitter: true
           docmappingprojectname: false
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "build(docs): auto generate vim documentation"
           commit_user_name: "github-actions[bot]"
