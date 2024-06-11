@@ -131,11 +131,13 @@ function M.setup()
     bang = false,
     desc = 'GitHub Navigator',
     complete = function(arg_lead, cmdline, _)
-      local subcmd_key, subcmd_arg_lead = cmdline:match('^GH[!]*%s(%S+)%s(.*)$')
+      local subcmd_key, subcmd_arg_lead = cmdline:match("^['<,'>]*GH[!]*%s(%S+)%s(.*)$")
+
       if subcmd_key and subcmd_arg_lead and subcommand_tbl[subcmd_key] and subcommand_tbl[subcmd_key].complete then
         return subcommand_tbl[subcmd_key].complete(subcmd_arg_lead)
       end
-      if cmdline:match('^GH[!]*%s+%w*$') then
+
+      if cmdline:match("^['<,'>]*GH[!]*%s+%w*$") then
         local subcommand_keys = vim.tbl_keys(subcommand_tbl)
         return vim
           .iter(subcommand_keys)
