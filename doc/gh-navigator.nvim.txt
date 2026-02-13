@@ -99,6 +99,19 @@ SUB-COMMANDS ~
   [!Note] Both `GH browse` and `GH blame` can accept a range. For instance, in
   visual mode (**V**), select a set of lines and run `GH blame` to open the blame
   view for that selection.
+
+COPY TO CLIPBOARD ~
+
+Append `!` to any command to copy the URL to the system clipboard instead of
+opening it in the browser.
+
+>vim
+    GH! pr 1234
+    GH! browse
+    GH! blame
+    GH! repo issues
+<
+
 ==============================================================================
 2. Links                                             *gh-navigator.nvim-links*
 
