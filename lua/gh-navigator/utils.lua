@@ -17,29 +17,24 @@ local function open_or_copy(url, bang)
   end
 end
 
-local function git_cmd(dir, args)
-  if dir then
-    return 'git -C ' .. vim.fn.shellescape(dir) .. ' ' .. args
-  end
-  return 'git ' .. args
+local function run_git(dir, args)
+  local cmd = vim.list_extend({ 'git' }, args)
+  return vim.system(cmd, { cwd = dir, text = true }):wait()
 end
 
-local function gh_cmd(dir, args)
-  if dir then
-    return 'cd ' .. vim.fn.shellescape(dir) .. ' && gh ' .. args
-  end
-  return 'gh ' .. args
+local function run_gh(dir, args)
+  local cmd = vim.list_extend({ 'gh' }, args)
+  return vim.system(cmd, { cwd = dir, text = true }):wait()
 end
 
 local function current_branch(dir)
-  return vim.trim(vim.fn.system(git_cmd(dir, 'branch --show-current')))
+  local result = run_git(dir, { 'branch', '--show-current' })
+  return vim.trim(result.stdout)
 end
 
 local function repo_url(dir)
-  local cmd = gh_cmd(dir, 'repo view --json url')
-  local result = vim.fn.system(cmd)
-
-  return vim.json.decode(result).url
+  local result = run_gh(dir, { 'repo', 'view', '--json', 'url' })
+  return vim.json.decode(result.stdout).url
 end
 
 local function blame_url(filename, dir)
@@ -71,19 +66,18 @@ local function ui_select_pr(prs, bang)
 end
 
 local function open_pr_by_number(number, bang, dir)
-  local cmd = gh_cmd(dir, 'pr view ' .. number .. ' --json url')
-  local result = vim.fn.system(cmd)
+  local result = run_gh(dir, { 'pr', 'view', tostring(number), '--json', 'url' })
 
-  if not string.find(result, 'Could not resolve') then
-    open_or_copy(vim.json.decode(result).url, bang)
+  if not string.find(result.stdout, 'Could not resolve') then
+    open_or_copy(vim.json.decode(result.stdout).url, bang)
   else
     vim.notify('PR #' .. number .. ' not found', vim.log.levels.INFO, { title = 'GH Navigator' })
   end
 end
 
 local function open_pr_by_search(query, bang, dir)
-  local cmd = gh_cmd(dir, 'pr list --search "' .. query .. '" --state merged --json number,title,author,url')
-  local results = vim.json.decode(vim.fn.system(cmd))
+  local result = run_gh(dir, { 'pr', 'list', '--search', query, '--state', 'merged', '--json', 'number,title,author,url' })
+  local results = vim.json.decode(result.stdout)
 
   if vim.tbl_count(results) == 1 then
     open_or_copy(results[1].url, bang)
@@ -95,11 +89,11 @@ local function open_pr_by_search(query, bang, dir)
 end
 
 local function repo_root_for_dir(dir)
-  local result = vim.trim(vim.fn.system(git_cmd(dir, 'rev-parse --show-toplevel')))
-  if vim.v.shell_error ~= 0 then
+  local result = run_git(dir, { 'rev-parse', '--show-toplevel' })
+  if result.code ~= 0 then
     return nil
   end
-  return result
+  return vim.trim(result.stdout)
 end
 
 function M.buf_repo_dir()
@@ -169,8 +163,8 @@ function M.open_commit(sha, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local cmd = gh_cmd(dir, 'browse ' .. sha .. ' -n')
-  local url = vim.trim(vim.fn.system(cmd))
+  local result = run_gh(dir, { 'browse', sha, '-n' })
+  local url = vim.trim(result.stdout)
   open_or_copy(url, bang)
 end
 
@@ -180,8 +174,8 @@ function M.open_file(filename, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local cmd = gh_cmd(dir, 'browse ' .. filename .. ' -n')
-  local url = vim.trim(vim.fn.system(cmd))
+  local result = run_gh(dir, { 'browse', filename, '-n' })
+  local url = vim.trim(result.stdout)
   open_or_copy(url, bang)
 end
 
@@ -204,11 +198,10 @@ function M.open_repo(path, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local cmd = gh_cmd(dir, 'repo view --json url')
-  local result = vim.fn.system(cmd)
+  local result = run_gh(dir, { 'repo', 'view', '--json', 'url' })
 
-  if not string.find(result, 'no git remotes found') then
-    open_or_copy(vim.json.decode(result).url .. '/' .. path, bang)
+  if not string.find(result.stdout, 'no git remotes found') then
+    open_or_copy(vim.json.decode(result.stdout).url .. '/' .. path, bang)
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'GH Navigator' })
   end
@@ -220,13 +213,8 @@ function M.is_commit(arg, dir)
     return false
   end
 
-  local result = vim.fn.system(git_cmd(dir, 'rev-parse --verify ' .. arg))
-
-  if string.find(result, 'fatal') then
-    return false
-  else
-    return true
-  end
+  local result = run_git(dir, { 'rev-parse', '--verify', arg })
+  return result.code == 0
 end
 
 function M.gh_cli_installed()

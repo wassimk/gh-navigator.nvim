@@ -8,7 +8,9 @@ This Neovim plugin makes jumping from coding to GitHub as painless as possible.
 
 ### Prerequisites
 
-The plugin primarily acts as a wrapper for the [GitHub CLI](https://cli.github.com/) (`gh`), and also makes a few direct `git` calls. So ensure the `gh` tool is installed and can connect to your GitHub account. 
+- **Neovim 0.10+** is required (for `vim.system`).
+
+The plugin primarily acts as a wrapper for the [GitHub CLI](https://cli.github.com/) (`gh`), and also makes a few direct `git` calls. So ensure the `gh` tool is installed and can connect to your GitHub account.
 
 Here are instructions for macOS users:
 

@@ -2,12 +2,11 @@ local M = {}
 
 local _originals = {}
 local _system_patterns = {}
-local _shell_error = 0
 
---- Program vim.fn.system to return `response` when command contains `pattern` (plain substring match).
+--- Program vim.system to return `response` when command contains `pattern` (plain substring match).
 ---@param pattern string plain substring to match against the command string
----@param response string value vim.fn.system should return
----@param exit_code? number optional exit code for vim.v.shell_error (default 0)
+---@param response string value vim.system should return as stdout
+---@param exit_code? number optional exit code (default 0)
 function M.set_system_response(pattern, response, exit_code)
   table.insert(_system_patterns, { pattern = pattern, response = response, exit_code = exit_code or 0 })
 end
@@ -17,38 +16,37 @@ function M.clear_system_responses()
   _system_patterns = {}
 end
 
---- Install mocks for vim.fn.system, vim.fn.executable, vim.fn.setreg,
+--- Install mocks for vim.system, vim.fn.executable, vim.fn.setreg,
 --- vim.fn.expand, vim.ui.open, vim.ui.select, and vim.notify.
 function M.setup_mocks()
   _system_patterns = {}
 
   _originals = {
+    system = vim.system,
     ui_open = vim.ui.open,
     ui_select = vim.ui.select,
     notify = vim.notify,
   }
 
-  -- Pattern-matched system mock
-  vim.fn.system = function(cmd)
-    local cmd_str = type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
+  -- Pattern-matched vim.system mock
+  vim.system = function(cmd, _)
+    local cmd_str = table.concat(cmd, ' ')
     for _, entry in ipairs(_system_patterns) do
       if cmd_str:find(entry.pattern, 1, true) then
-        _shell_error = entry.exit_code or 0
-        return entry.response
+        local code = entry.exit_code or 0
+        return {
+          wait = function()
+            return { stdout = entry.response, stderr = '', code = code }
+          end,
+        }
       end
     end
-    _shell_error = 0
-    return ''
+    return {
+      wait = function()
+        return { stdout = '', stderr = '', code = 0 }
+      end,
+    }
   end
-
-  vim.v = vim.v or {}
-  setmetatable(vim.v, {
-    __index = function(_, key)
-      if key == 'shell_error' then
-        return _shell_error
-      end
-    end,
-  })
 
   vim.fn.executable = function(_)
     return 1
@@ -59,10 +57,6 @@ function M.setup_mocks()
   vim.fn.setreg = function(reg, value)
     M.last_register = reg
     M.last_register_value = value
-  end
-
-  vim.fn.shellescape = function(s)
-    return "'" .. s .. "'"
   end
 
   M.expand_results = {}
@@ -96,16 +90,13 @@ end
 --- Revert all stubs installed by setup_mocks().
 function M.teardown_mocks()
   -- Remove direct entries from vim.fn so the metatable __index resumes
-  rawset(vim.fn, 'system', nil)
   rawset(vim.fn, 'executable', nil)
   rawset(vim.fn, 'setreg', nil)
   rawset(vim.fn, 'expand', nil)
-  rawset(vim.fn, 'shellescape', nil)
 
-  -- Reset vim.v metatable
-  setmetatable(vim.v, nil)
-  _shell_error = 0
-
+  if _originals.system then
+    vim.system = _originals.system
+  end
   if _originals.ui_open then
     vim.ui.open = _originals.ui_open
   end
