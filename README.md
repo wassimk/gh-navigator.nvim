@@ -78,3 +78,13 @@ GH! browse
 GH! blame
 GH! repo issues
 ```
+
+### Keymaps
+
+The plugin doesn't set any keymaps by default. Here are a few examples to get started:
+
+```lua
+vim.keymap.set('n', '<leader>go', '<cmd>GH<cr>', { desc = 'GH: open commit or PR' })
+vim.keymap.set('n', '<leader>gb', '<cmd>GH browse<cr>', { desc = 'GH: browse file' })
+vim.keymap.set('v', '<leader>gb', ':GH blame<cr>', { desc = 'GH: blame selection' })
+```
