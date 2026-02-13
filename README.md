@@ -59,3 +59,14 @@ Move the cursor over a commit SHA, PR number, or search term and run the `GH` co
 
 > [!Note]
 > Both `GH browse` and `GH blame` can accept a range. For instance, in visual mode (**V**), select a set of lines and run `GH blame` to open the blame view for that selection.
+
+### Copy to Clipboard
+
+Append `!` to any command to copy the URL to the system clipboard instead of opening it in the browser.
+
+```vim
+GH! pr 1234
+GH! browse
+GH! blame
+GH! repo issues
+```
