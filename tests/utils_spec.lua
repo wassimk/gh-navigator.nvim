@@ -51,12 +51,59 @@ describe('gh-navigator.utils', function()
     it('returns nil when buffer has no file', function()
       helpers.expand_results['%:p:h'] = ''
 
+      -- Mock: no normal windows with files either
+      vim.api.nvim_list_wins = function()
+        return {}
+      end
+
       assert.is_nil(utils.buf_repo_dir())
+    end)
+
+    it('falls back to normal window buffer for floats', function()
+      helpers.expand_results['%:p:h'] = ''
+      helpers.set_system_response('rev-parse --show-toplevel', '/home/user/project\n')
+
+      vim.api.nvim_list_wins = function()
+        return { 1001, 1002 }
+      end
+      vim.api.nvim_win_get_config = function(win)
+        if win == 1001 then
+          return { relative = 'editor' } -- float
+        end
+        return { relative = '' } -- normal
+      end
+      vim.api.nvim_win_get_buf = function(_)
+        return 42
+      end
+      vim.api.nvim_buf_get_name = function(_)
+        return '/home/user/project/src/main.lua'
+      end
+      vim.fn.fnamemodify = function(name, mod)
+        if mod == ':h' then
+          return name:match('(.+)/[^/]+$') or name
+        end
+        return name
+      end
+
+      assert.equals('/home/user/project', utils.buf_repo_dir())
     end)
 
     it('returns nil when not in a git repo', function()
       helpers.expand_results['%:p:h'] = '/tmp/no-repo'
       helpers.set_system_response('rev-parse --show-toplevel', 'fatal: not a git repository\n', 128)
+
+      assert.is_nil(utils.buf_repo_dir())
+    end)
+
+    it('returns nil when float and no normal windows have files', function()
+      helpers.expand_results['%:p:h'] = ''
+
+      vim.api.nvim_list_wins = function()
+        return { 1001 }
+      end
+      vim.api.nvim_win_get_config = function(_)
+        return { relative = 'editor' } -- float only
+      end
 
       assert.is_nil(utils.buf_repo_dir())
     end)

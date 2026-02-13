@@ -97,6 +97,19 @@ end
 function M.buf_repo_dir()
   local buf_dir = vim.fn.expand('%:p:h')
   if buf_dir == '' then
+    -- Current buffer has no file (e.g., floating/scratch buffer).
+    -- Fall back to the first normal window's buffer.
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_get_config(win).relative == '' then
+        local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
+        if name ~= '' then
+          buf_dir = vim.fn.fnamemodify(name, ':h')
+          break
+        end
+      end
+    end
+  end
+  if buf_dir == '' then
     return nil
   end
 
