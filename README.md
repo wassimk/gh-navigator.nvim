@@ -46,7 +46,15 @@ Install **gh-navigator** via your preferred plugin manager. The following exampl
 
 ### `GH` Command
 
-Move the cursor over a commit SHA, PR number, or search term and run the `GH` command to open it on GitHub. The term under the cursor will be used as the argument.
+Open a commit or PR on GitHub by passing a commit SHA, PR number, or search term directly as an argument.
+
+```vim
+GH eef4a114e0bacc929d8335ef52b1b859d40097f4
+GH 1234
+GH refactor the actor class
+```
+
+When called with no arguments, the word under the cursor is used instead.
 
 ### Sub-Commands
 
