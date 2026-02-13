@@ -62,6 +62,7 @@ When called with no arguments, the word under the cursor is used instead.
 |--------------------|:---------------|
 | `GH blame` | Opens the current file in GitHub's blame view. |
 | `GH browse` | Opens the current file in GitHub's blob view. |
+| `GH compare` | Opens GitHub's compare view for the current branch against the default branch. |
 | `GH pr <arg>` | Opens a PR based on a commit SHA, PR number, or search term (e.g., `GH pr 1234`, `GH pr c2d25b3`, or `GH pr refactor the actor class`). |
 | `GH repo <path>` | Opens a certain path in the current repo on GitHub (e.g., `GH repo issues` opens the repo's issues page). Auto-completion is available for paths such as *issues, pulls, actions, releases*, etc.|
 
