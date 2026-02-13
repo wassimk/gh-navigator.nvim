@@ -26,6 +26,7 @@ jobs:
           treesitter: true
           docmappingprojectname: false
       - uses: stefanzweifel/git-auto-commit-action@v5
+        if: github.ref == 'refs/heads/main'
         with:
           commit_message: "build(docs): auto generate vim documentation"
           commit_user_name: "github-actions[bot]"
