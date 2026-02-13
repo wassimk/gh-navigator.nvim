@@ -1,4 +1,4 @@
-*gh-navigator.nvim.txt*       For NVIM v0.10.0       Last change: 2024 June 11
+*gh-navigator.nvim.txt*     For NVIM v0.10.0     Last change: 2026 February 13
 
 ==============================================================================
 Table of Contents                        *gh-navigator.nvim-table-of-contents*
