@@ -89,6 +89,10 @@ SUB-COMMANDS ~
   GH browse                               Opens the current file in GitHub’s
                                           blob view.
 
+  GH compare                              Opens GitHub’s compare view for
+                                          the current branch against the
+                                          default branch.
+
   GH pr <arg>                             Opens a PR based on a commit SHA,
                                           PR number, or search term (e.g.,
                                           GH pr 1234, GH pr c2d25b3, or
