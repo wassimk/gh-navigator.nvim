@@ -103,30 +103,22 @@ describe('gh-navigator.utils', function()
       helpers.expand_results['%:p:h'] = '/tmp/scratch'
 
       local call_count = 0
-      vim.fn.system = function(cmd)
-        local cmd_str = type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
+      vim.system = function(cmd, _)
         call_count = call_count + 1
         if call_count == 1 then
           -- First call: current buffer's dir fails
-          assert.truthy(cmd_str:find('/tmp/scratch'))
-          vim.v = setmetatable(vim.v or {}, {
-            __index = function(_, key)
-              if key == 'shell_error' then
-                return 128
-              end
+          return {
+            wait = function()
+              return { stdout = 'fatal: not a git repository\n', stderr = '', code = 128 }
             end,
-          })
-          return 'fatal: not a git repository\n'
+          }
         else
           -- Second call: normal window's buffer succeeds
-          vim.v = setmetatable(vim.v or {}, {
-            __index = function(_, key)
-              if key == 'shell_error' then
-                return 0
-              end
+          return {
+            wait = function()
+              return { stdout = '/home/user/project\n', stderr = '', code = 0 }
             end,
-          })
-          return '/home/user/project\n'
+          }
         end
       end
 
@@ -188,9 +180,9 @@ describe('gh-navigator.utils', function()
       assert.is_true(utils.is_commit('abc123def456'))
     end)
 
-    it('returns false when output contains fatal', function()
+    it('returns false for non-zero exit code', function()
       mock_buf_repo('/mock/repo')
-      helpers.set_system_response('rev-parse --verify', 'fatal: Needed a single revision\n')
+      helpers.set_system_response('rev-parse --verify', 'fatal: Needed a single revision\n', 128)
 
       assert.is_false(utils.is_commit('not-a-commit'))
     end)
