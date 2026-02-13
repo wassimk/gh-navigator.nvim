@@ -12,7 +12,7 @@ function M.setup()
     if filename == '' then
       local dir = utils.buf_repo_dir()
       if not dir then
-        vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
+        utils.not_in_repo_notify()
         return
       end
       filename = utils.buf_relative_path(dir)
@@ -31,7 +31,7 @@ function M.setup()
     if filename == '' then
       local dir = utils.buf_repo_dir()
       if not dir then
-        vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
+        utils.not_in_repo_notify()
         return
       end
       filename = utils.buf_relative_path(dir)

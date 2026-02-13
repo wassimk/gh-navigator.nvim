@@ -38,7 +38,7 @@ local function blame_url(filename, dir)
   return repo_url(dir) .. '/blame/' .. current_branch(dir) .. '/' .. filename
 end
 
-local function not_in_repo_notify()
+function M.not_in_repo_notify()
   vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
 end
 
@@ -130,7 +130,7 @@ end
 function M.open_compare(bang)
   local dir = M.buf_repo_dir()
   if not dir then
-    return not_in_repo_notify()
+    return M.not_in_repo_notify()
   end
 
   local url = repo_url(dir) .. '/compare/' .. current_branch(dir)
@@ -145,7 +145,7 @@ end
 function M.open_blame(filename, bang)
   local dir = M.buf_repo_dir()
   if not dir then
-    return not_in_repo_notify()
+    return M.not_in_repo_notify()
   end
 
   local url = blame_url(filename, dir)
@@ -160,7 +160,7 @@ end
 function M.open_commit(sha, bang)
   local dir = M.buf_repo_dir()
   if not dir then
-    return not_in_repo_notify()
+    return M.not_in_repo_notify()
   end
 
   local cmd = gh_cmd(dir, 'browse ' .. sha .. ' -n')
@@ -176,7 +176,7 @@ end
 function M.open_file(filename, bang)
   local dir = M.buf_repo_dir()
   if not dir then
-    return not_in_repo_notify()
+    return M.not_in_repo_notify()
   end
 
   local cmd = gh_cmd(dir, 'browse ' .. filename .. ' -n')
@@ -192,7 +192,7 @@ end
 function M.open_pr(number_or_query, bang)
   local dir = M.buf_repo_dir()
   if not dir then
-    return not_in_repo_notify()
+    return M.not_in_repo_notify()
   end
 
   if tonumber(number_or_query) then
@@ -205,7 +205,7 @@ end
 function M.open_repo(path, bang)
   local dir = M.buf_repo_dir()
   if not dir then
-    return not_in_repo_notify()
+    return M.not_in_repo_notify()
   end
 
   local cmd = gh_cmd(dir, 'repo view --json url')
