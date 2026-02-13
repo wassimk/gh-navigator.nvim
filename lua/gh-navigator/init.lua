@@ -153,31 +153,6 @@ function M.setup()
       end
     end,
   })
-
-  vim.api.nvim_create_user_command('GHBlame', function(command)
-    vim.deprecate('GHBlame', 'GH blame', 'v0.2.0', 'gh-navigator', false)
-    blame(command.args, command)
-  end, { force = true, range = true, nargs = '?', desc = 'Open blame in GitHub' })
-
-  vim.api.nvim_create_user_command('GHBrowse', function(command)
-    vim.deprecate('GHBrowse', 'GH browse', 'v0.2.0', 'gh-navigator', false)
-    browse(command.args, command)
-  end, { force = true, range = true, nargs = '?', desc = 'Browse to file in GitHub' })
-
-  vim.api.nvim_create_user_command('GHFile', function(command)
-    vim.deprecate('GHFile', 'GH browse', 'v0.2.0', 'gh-navigator', false)
-    browse(command.args, command)
-  end, { force = true, range = true, nargs = '?', desc = 'Open file in GitHub' })
-
-  vim.api.nvim_create_user_command('GHPR', function(command)
-    vim.deprecate('GHPR', 'GH pr', 'v0.2.0', 'gh-navigator', false)
-    pr(command.fargs)
-  end, { force = true, nargs = '?', desc = 'Open PR in GitHub using commit sha, number, or search term(s)' })
-
-  vim.api.nvim_create_user_command('GHRepo', function(command)
-    vim.deprecate('GHRepo', 'GH repo', 'v0.2.0', 'gh-navigator', false)
-    repo(command.fargs)
-  end, { force = true, nargs = '?', desc = 'Open GitHub repository' })
 end
 
 return M
