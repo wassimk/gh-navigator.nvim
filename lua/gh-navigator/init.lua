@@ -18,10 +18,10 @@ function M.setup()
     end
 
     if opts.range == 0 then
-      utils.open_blame(filename)
+      utils.open_blame(filename, opts.bang)
     else
       filename = filename .. '#' .. 'L' .. opts.line1 .. '-' .. 'L' .. opts.line2
-      utils.open_blame(filename)
+      utils.open_blame(filename, opts.bang)
     end
   end
 
@@ -32,26 +32,26 @@ function M.setup()
     end
 
     if opts.range == 0 then
-      utils.open_file(filename)
+      utils.open_file(filename, opts.bang)
     else
       filename = filename .. ':' .. opts.line1 .. '-' .. opts.line2
-      utils.open_file(filename)
+      utils.open_file(filename, opts.bang)
     end
   end
 
-  local function pr(args)
+  local function pr(args, opts)
     local arg = table.concat(args, ' ')
 
     if arg == '' then
       arg = vim.fn.expand('<cword>')
     end
-    utils.open_pr(arg)
+    utils.open_pr(arg, opts.bang)
   end
 
-  local function repo(args)
+  local function repo(args, opts)
     local arg = args and args[1] or ''
 
-    utils.open_repo(arg)
+    utils.open_repo(arg, opts.bang)
   end
 
   local subcommand_tbl = {
@@ -66,13 +66,13 @@ function M.setup()
       end,
     },
     pr = {
-      call = function(args)
-        pr(args)
+      call = function(args, opts)
+        pr(args, opts)
       end,
     },
     repo = {
-      call = function(args)
-        repo(args)
+      call = function(args, opts)
+        repo(args, opts)
       end,
       complete = function(subcmd_arg_lead)
         local repo_args = {
@@ -108,9 +108,9 @@ function M.setup()
       end
 
       if utils.is_commit(arg) then
-        utils.open_commit(arg)
+        utils.open_commit(arg, opts.bang)
       else
-        utils.open_pr(arg)
+        utils.open_pr(arg, opts.bang)
       end
     else
       local subcommand_key = fargs[1]
@@ -128,7 +128,7 @@ function M.setup()
     nargs = '*',
     range = true,
     force = true,
-    bang = false,
+    bang = true,
     desc = 'GitHub Navigator',
     complete = function(arg_lead, cmdline, _)
       local subcmd_key, subcmd_arg_lead = cmdline:match("^['<,'>]*GH[!]*%s(%S+)%s(.*)$")
