@@ -12,14 +12,8 @@ Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neo
 - **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
 
 ```shell
-# Install (see https://github.com/cli/cli#installation for other platforms)
 brew install gh
-
-# Authenticate
 gh auth login
-
-# Verify
-gh auth status
 ```
 
 ### Installation
