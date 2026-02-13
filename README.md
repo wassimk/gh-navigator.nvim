@@ -1,6 +1,6 @@
 # gh-navigator.nvim
 
-This Neovim plugin makes jumping from coding to GitHub as painless as possible.
+Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neovim buffer.
 
 [![build](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml/badge.svg)](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml) ![release](https://img.shields.io/github/v/release/wassimk/gh-navigator.nvim?logo=github)
 
@@ -8,28 +8,23 @@ This Neovim plugin makes jumping from coding to GitHub as painless as possible.
 
 ### Prerequisites
 
-- **Neovim 0.10+** is required (for `vim.system`).
-
-The plugin primarily acts as a wrapper for the [GitHub CLI](https://cli.github.com/) (`gh`), and also makes a few direct `git` calls. So ensure the `gh` tool is installed and can connect to your GitHub account.
-
-Here are instructions for macOS users:
-
-1. Install `gh` and connect it to your GitHub account. 
+- **Neovim 0.10+**
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
 
 ```shell
+# Install (see https://github.com/cli/cli#installation for other platforms)
 brew install gh
+
+# Authenticate
 gh auth login
-```
 
-2. If `gh` is already installed, check it's working with:
-
-```shell
+# Verify
 gh auth status
 ```
 
 ### Installation
 
-Install **gh-navigator** via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
+Install via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
 
 ```lua
 {
@@ -44,19 +39,7 @@ Install **gh-navigator** via your preferred plugin manager. The following exampl
 
 ## Usage
 
-`GH` is the main command, but it accepts different sub-commands:
-
-### `GH` Command
-
-Open a commit or PR on GitHub by passing a commit SHA, PR number, or search term directly as an argument.
-
-```vim
-GH eef4a114e0bacc929d8335ef52b1b859d40097f4
-GH 1234
-GH refactor the actor class
-```
-
-When called with no arguments, the word under the cursor is used instead.
+The plugin provides a single `:GH` command with sub-commands. Tab completion is available for all sub-commands and their arguments.
 
 ### Sub-Commands
 
@@ -65,11 +48,23 @@ When called with no arguments, the word under the cursor is used instead.
 | `GH blame` | Opens the current file in GitHub's blame view. |
 | `GH browse` | Opens the current file in GitHub's blob view. |
 | `GH compare` | Opens GitHub's compare view for the current branch against the default branch. |
-| `GH pr <arg>` | Opens a PR based on a commit SHA, PR number, or search term (e.g., `GH pr 1234`, `GH pr c2d25b3`, or `GH pr refactor the actor class`). |
-| `GH repo <path>` | Opens a certain path in the current repo on GitHub (e.g., `GH repo issues` opens the repo's issues page). Auto-completion is available for paths such as *issues, pulls, actions, releases*, etc.|
+| `GH pr <arg>` | Opens a PR by number or search term (e.g., `GH pr 1234` or `GH pr refactor the actor class`). |
+| `GH repo <path>` | Opens a path in the current repo on GitHub (e.g., `GH repo issues`). Tab-completable paths include *issues*, *pulls*, *actions*, *releases*, etc. |
 
 > [!Note]
-> Both `GH browse` and `GH blame` can accept a range. For instance, in visual mode (**V**), select a set of lines and run `GH blame` to open the blame view for that selection.
+> Both `GH browse` and `GH blame` accept a visual range. Select lines in visual mode (**V**) and run `GH blame` to open the blame view for that selection.
+
+### Bare `GH` Command
+
+When called without a sub-command, `GH` tries to interpret the argument as a commit SHA first, then falls back to a PR search. With no arguments, the word under the cursor is used.
+
+```vim
+GH eef4a114e0bacc929d8335ef52b1b859d40097f4
+GH 1234
+GH refactor the actor class
+```
+
+This is a shortcut — `GH pr <arg>` skips the commit check and searches PRs directly.
 
 ### Copy to Clipboard
 
@@ -82,12 +77,17 @@ GH! blame
 GH! repo issues
 ```
 
+### Per-Buffer Repo Detection
+
+The plugin detects the Git repository from the current buffer's file path, not from Neovim's working directory. This means you can open Neovim in a parent folder and edit files across multiple repos without any issues.
+
 ### Keymaps
 
-The plugin doesn't set any keymaps by default. Here are a few examples to get started:
+No keymaps are set by default. Here are some examples:
 
 ```lua
 vim.keymap.set('n', '<leader>go', '<cmd>GH<cr>', { desc = 'GH: open commit or PR' })
-vim.keymap.set('n', '<leader>gb', '<cmd>GH browse<cr>', { desc = 'GH: browse file' })
+vim.keymap.set('n', '<leader>gf', '<cmd>GH browse<cr>', { desc = 'GH: browse file' })
+vim.keymap.set('n', '<leader>gb', '<cmd>GH blame<cr>', { desc = 'GH: blame file' })
 vim.keymap.set('v', '<leader>gb', ':GH blame<cr>', { desc = 'GH: blame selection' })
 ```
