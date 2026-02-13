@@ -91,6 +91,7 @@ function M.setup()
       complete = function(subcmd_arg_lead)
         local repo_args = {
           'actions',
+          'agents',
           'discussions',
           'issues',
           'projects',
