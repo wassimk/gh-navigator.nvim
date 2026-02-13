@@ -28,7 +28,8 @@ jobs:
       - name: Clone plenary.nvim
         run: git clone --depth 1 https://github.com/nvim-lua/plenary.nvim /tmp/plenary.nvim
       - name: Run tests
-        run: PLENARY_DIR=/tmp/plenary.nvim nvim --headless -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal_init.lua'}"
+        run: PLENARY_DIR=/tmp/plenary.nvim nvim --headless -u tests/minimal_init.lua -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal_init.lua'}"
+        timeout-minutes: 5
   docs:
     name: vimdoc
     runs-on: ubuntu-latest
