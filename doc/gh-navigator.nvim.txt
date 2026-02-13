@@ -26,14 +26,8 @@ PREREQUISITES ~
 - **GitHub CLI** (`gh`) — installed and authenticated
 
 >shell
-    # Install (see https://github.com/cli/cli#installation for other platforms)
     brew install gh
-    
-    # Authenticate
     gh auth login
-    
-    # Verify
-    gh auth status
 <
 
 
