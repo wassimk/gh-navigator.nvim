@@ -41,11 +41,10 @@ describe('gh-navigator.utils', function()
       assert.is_true(utils.in_github_repo())
     end)
 
-    it('returns false and notifies for empty system output', function()
+    it('returns false silently for empty system output', function()
       -- default mock returns '' when no pattern matches
       assert.is_false(utils.in_github_repo())
-      assert.equals(1, #helpers.notifications)
-      assert.truthy(helpers.notifications[1].msg:find('GitHub repository'))
+      assert.equals(0, #helpers.notifications)
     end)
   end)
 

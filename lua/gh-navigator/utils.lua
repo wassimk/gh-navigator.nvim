@@ -168,7 +168,6 @@ end
 
 function M.in_github_repo()
   if vim.fn.system('gh repo view --json url 2>/dev/null') == '' then
-    vim.notify('gh-navigator expects to be in a GitHub repository', vim.log.ERROR, { title = 'gh-navigator' })
     return false
   else
     return true
