@@ -6,7 +6,7 @@ local M = {}
 
 local function copy_to_clipboard(url)
   vim.fn.setreg('+', url)
-  vim.notify('Copied to clipboard: ' .. url, vim.log.levels.INFO, { title = 'gh-navigator' })
+  vim.notify('Copied to clipboard: ' .. url, vim.log.levels.INFO, { title = 'GH Navigator' })
 end
 
 local function open_or_copy(url, bang)
@@ -47,7 +47,7 @@ local function blame_url(filename, dir)
 end
 
 function M.not_in_repo_notify()
-  vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
+  vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'GH Navigator' })
 end
 
 local function ui_select_pr(prs, bang)
@@ -77,7 +77,7 @@ local function open_pr_by_number(number, bang, dir)
   if not string.find(result, 'Could not resolve') then
     open_or_copy(vim.json.decode(result).url, bang)
   else
-    vim.notify('PR #' .. number .. ' not found', vim.log.INFO, { title = 'GHPR' })
+    vim.notify('PR #' .. number .. ' not found', vim.log.levels.INFO, { title = 'GH Navigator' })
   end
 end
 
@@ -90,12 +90,12 @@ local function open_pr_by_search(query, bang, dir)
   elseif vim.tbl_count(results) > 1 then
     ui_select_pr(results, bang)
   else
-    vim.notify('No PR found for: ' .. query, vim.log.INFO, { title = ':OpenInGHPR' })
+    vim.notify('No PR found for: ' .. query, vim.log.levels.INFO, { title = 'GH Navigator' })
   end
 end
 
 local function repo_root_for_dir(dir)
-  local result = vim.trim(vim.fn.system('git -C ' .. vim.fn.shellescape(dir) .. ' rev-parse --show-toplevel'))
+  local result = vim.trim(vim.fn.system(git_cmd(dir, 'rev-parse --show-toplevel')))
   if vim.v.shell_error ~= 0 then
     return nil
   end
@@ -210,7 +210,7 @@ function M.open_repo(path, bang, dir)
   if not string.find(result, 'no git remotes found') then
     open_or_copy(vim.json.decode(result).url .. '/' .. path, bang)
   else
-    vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
+    vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'GH Navigator' })
   end
 end
 
@@ -231,7 +231,7 @@ end
 
 function M.gh_cli_installed()
   if vim.fn.executable('gh') == 0 then
-    vim.notify('gh-navigator requires the GitHub CLI to be installed', vim.log.ERROR, { title = 'gh-navigator' })
+    vim.notify('gh-navigator requires the GitHub CLI to be installed', vim.log.ERROR, { title = 'GH Navigator' })
     return false
   else
     return true
