@@ -8,7 +8,7 @@ plenary:
 	fi
 
 test: plenary
-	PLENARY_DIR=$(PLENARY_DIR) nvim --headless -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal_init.lua'}"
+	PLENARY_DIR=$(PLENARY_DIR) nvim --headless -u tests/minimal_init.lua -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal_init.lua'}"
 
 lint:
 	stylua --check lua/ tests/
