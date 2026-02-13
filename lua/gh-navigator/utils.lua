@@ -9,6 +9,14 @@ local function copy_to_clipboard(url)
   vim.notify('Copied to clipboard: ' .. url, vim.log.levels.INFO, { title = 'gh-navigator' })
 end
 
+local function open_or_copy(url, bang)
+  if bang then
+    copy_to_clipboard(url)
+  else
+    vim.ui.open(url)
+  end
+end
+
 local function git_cmd(dir, args)
   if dir then
     return 'git -C ' .. vim.fn.shellescape(dir) .. ' ' .. args
@@ -57,11 +65,7 @@ local function ui_select_pr(prs, bang)
     end,
   }, function(choice)
     if choice ~= nil then
-      if bang then
-        return copy_to_clipboard(choice.url)
-      else
-        return vim.ui.open(choice.url)
-      end
+      open_or_copy(choice.url, bang)
     end
   end)
 end
@@ -71,12 +75,7 @@ local function open_pr_by_number(number, bang, dir)
   local result = vim.fn.system(cmd)
 
   if not string.find(result, 'Could not resolve') then
-    local url = vim.json.decode(result).url
-    if bang then
-      copy_to_clipboard(url)
-    else
-      vim.ui.open(url)
-    end
+    open_or_copy(vim.json.decode(result).url, bang)
   else
     vim.notify('PR #' .. number .. ' not found', vim.log.INFO, { title = 'GHPR' })
   end
@@ -87,11 +86,7 @@ local function open_pr_by_search(query, bang, dir)
   local results = vim.json.decode(vim.fn.system(cmd))
 
   if vim.tbl_count(results) == 1 then
-    if bang then
-      copy_to_clipboard(results[1].url)
-    else
-      vim.ui.open(results[1].url)
-    end
+    open_or_copy(results[1].url, bang)
   elseif vim.tbl_count(results) > 1 then
     ui_select_pr(results, bang)
   else
@@ -134,12 +129,7 @@ function M.open_compare(bang)
   end
 
   local url = repo_url(dir) .. '/compare/' .. current_branch(dir)
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
-  end
+  open_or_copy(url, bang)
 end
 
 function M.open_blame(filename, bang)
@@ -149,12 +139,7 @@ function M.open_blame(filename, bang)
   end
 
   local url = blame_url(filename, dir)
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
-  end
+  open_or_copy(url, bang)
 end
 
 function M.open_commit(sha, bang)
@@ -165,12 +150,7 @@ function M.open_commit(sha, bang)
 
   local cmd = gh_cmd(dir, 'browse ' .. sha .. ' -n')
   local url = vim.trim(vim.fn.system(cmd))
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
-  end
+  open_or_copy(url, bang)
 end
 
 function M.open_file(filename, bang)
@@ -181,12 +161,7 @@ function M.open_file(filename, bang)
 
   local cmd = gh_cmd(dir, 'browse ' .. filename .. ' -n')
   local url = vim.trim(vim.fn.system(cmd))
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
-  end
+  open_or_copy(url, bang)
 end
 
 function M.open_pr(number_or_query, bang)
@@ -212,12 +187,7 @@ function M.open_repo(path, bang)
   local result = vim.fn.system(cmd)
 
   if not string.find(result, 'no git remotes found') then
-    local url = repo_url(dir) .. '/' .. path
-    if bang then
-      copy_to_clipboard(url)
-    else
-      vim.ui.open(url)
-    end
+    open_or_copy(repo_url(dir) .. '/' .. path, bang)
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
   end

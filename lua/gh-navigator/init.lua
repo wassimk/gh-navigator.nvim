@@ -7,42 +7,41 @@ function M.setup()
     return
   end
 
-  local function blame(args, opts)
+  local function buf_filename(args)
     local filename = args[1] or ''
     if filename == '' then
       local dir = utils.buf_repo_dir()
       if not dir then
         utils.not_in_repo_notify()
-        return
+        return nil
       end
       filename = utils.buf_relative_path(dir)
     end
+    return filename
+  end
 
-    if opts.range == 0 then
-      utils.open_blame(filename, opts.bang)
-    else
-      filename = filename .. '#' .. 'L' .. opts.line1 .. '-' .. 'L' .. opts.line2
-      utils.open_blame(filename, opts.bang)
+  local function blame(args, opts)
+    local filename = buf_filename(args)
+    if not filename then
+      return
     end
+
+    if opts.range ~= 0 then
+      filename = filename .. '#' .. 'L' .. opts.line1 .. '-' .. 'L' .. opts.line2
+    end
+    utils.open_blame(filename, opts.bang)
   end
 
   local function browse(args, opts)
-    local filename = args[1] or ''
-    if filename == '' then
-      local dir = utils.buf_repo_dir()
-      if not dir then
-        utils.not_in_repo_notify()
-        return
-      end
-      filename = utils.buf_relative_path(dir)
+    local filename = buf_filename(args)
+    if not filename then
+      return
     end
 
-    if opts.range == 0 then
-      utils.open_file(filename, opts.bang)
-    else
+    if opts.range ~= 0 then
       filename = filename .. ':' .. opts.line1 .. '-' .. opts.line2
-      utils.open_file(filename, opts.bang)
     end
+    utils.open_file(filename, opts.bang)
   end
 
   local function pr(args, opts)
