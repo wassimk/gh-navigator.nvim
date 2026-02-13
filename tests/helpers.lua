@@ -2,12 +2,14 @@ local M = {}
 
 local _originals = {}
 local _system_patterns = {}
+local _shell_error = 0
 
 --- Program vim.fn.system to return `response` when command contains `pattern` (plain substring match).
 ---@param pattern string plain substring to match against the command string
 ---@param response string value vim.fn.system should return
-function M.set_system_response(pattern, response)
-  table.insert(_system_patterns, { pattern = pattern, response = response })
+---@param exit_code? number optional exit code for vim.v.shell_error (default 0)
+function M.set_system_response(pattern, response, exit_code)
+  table.insert(_system_patterns, { pattern = pattern, response = response, exit_code = exit_code or 0 })
 end
 
 --- Remove all programmed system responses so the next test can start fresh.
@@ -31,11 +33,22 @@ function M.setup_mocks()
     local cmd_str = type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
     for _, entry in ipairs(_system_patterns) do
       if cmd_str:find(entry.pattern, 1, true) then
+        _shell_error = entry.exit_code or 0
         return entry.response
       end
     end
+    _shell_error = 0
     return ''
   end
+
+  vim.v = vim.v or {}
+  setmetatable(vim.v, {
+    __index = function(_, key)
+      if key == 'shell_error' then
+        return _shell_error
+      end
+    end,
+  })
 
   vim.fn.executable = function(_)
     return 1
@@ -48,8 +61,16 @@ function M.setup_mocks()
     M.last_register_value = value
   end
 
+  vim.fn.shellescape = function(s)
+    return "'" .. s .. "'"
+  end
+
+  M.expand_results = {}
   M.expand_result = nil
   vim.fn.expand = function(expr)
+    if M.expand_results[expr] ~= nil then
+      return M.expand_results[expr]
+    end
     return M.expand_result or expr
   end
 
@@ -79,6 +100,11 @@ function M.teardown_mocks()
   rawset(vim.fn, 'executable', nil)
   rawset(vim.fn, 'setreg', nil)
   rawset(vim.fn, 'expand', nil)
+  rawset(vim.fn, 'shellescape', nil)
+
+  -- Reset vim.v metatable
+  setmetatable(vim.v, nil)
+  _shell_error = 0
 
   if _originals.ui_open then
     vim.ui.open = _originals.ui_open
@@ -98,6 +124,7 @@ function M.teardown_mocks()
   M.select_items = nil
   M.notifications = {}
   M.expand_result = nil
+  M.expand_results = {}
 end
 
 return M

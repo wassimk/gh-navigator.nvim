@@ -17,8 +17,11 @@ describe('gh-navigator', function()
     utils.gh_cli_installed = function()
       return true
     end
-    utils.in_github_repo = function()
-      return true
+    utils.buf_repo_dir = function()
+      return '/mock/repo'
+    end
+    utils.buf_relative_path = function(_)
+      return helpers.expand_result or 'current_file.lua'
     end
     utils.is_commit = function(arg)
       table.insert(spy_calls, { fn = 'is_commit', args = { arg } })
@@ -86,29 +89,6 @@ describe('gh-navigator', function()
 
       local utils = require('gh-navigator.utils')
       utils.gh_cli_installed = function()
-        return false
-      end
-      utils.in_github_repo = function()
-        return true
-      end
-
-      require('gh-navigator').setup()
-
-      assert.equals(0, vim.fn.exists(':GH'))
-    end)
-
-    it('does not create GH command when not in github repo', function()
-      pcall(vim.api.nvim_del_user_command, 'GH')
-
-      package.loaded['gh-navigator'] = nil
-      package.loaded['gh-navigator.init'] = nil
-      package.loaded['gh-navigator.utils'] = nil
-
-      local utils = require('gh-navigator.utils')
-      utils.gh_cli_installed = function()
-        return true
-      end
-      utils.in_github_repo = function()
         return false
       end
 

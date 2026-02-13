@@ -7,14 +7,15 @@ function M.setup()
     return
   end
 
-  if not utils.in_github_repo() then
-    return
-  end
-
   local function blame(args, opts)
     local filename = args[1] or ''
     if filename == '' then
-      filename = vim.fn.expand('%:.')
+      local dir = utils.buf_repo_dir()
+      if not dir then
+        vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
+        return
+      end
+      filename = utils.buf_relative_path(dir)
     end
 
     if opts.range == 0 then
@@ -28,7 +29,12 @@ function M.setup()
   local function browse(args, opts)
     local filename = args[1] or ''
     if filename == '' then
-      filename = vim.fn.expand('%:.')
+      local dir = utils.buf_repo_dir()
+      if not dir then
+        vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
+        return
+      end
+      filename = utils.buf_relative_path(dir)
     end
 
     if opts.range == 0 then

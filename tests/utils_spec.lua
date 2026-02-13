@@ -14,6 +14,12 @@ describe('gh-navigator.utils', function()
     package.loaded['gh-navigator.utils'] = nil
   end)
 
+  --- Set up mocks so buf_repo_dir() returns the given repo root.
+  local function mock_buf_repo(repo_root, buf_dir)
+    helpers.expand_results['%:p:h'] = buf_dir or repo_root .. '/lua'
+    helpers.set_system_response('rev-parse --show-toplevel', repo_root .. '\n')
+  end
+
   describe('gh_cli_installed', function()
     it('returns true when gh is executable', function()
       vim.fn.executable = function(_)
@@ -34,39 +40,69 @@ describe('gh-navigator.utils', function()
     end)
   end)
 
-  describe('in_github_repo', function()
-    it('returns true for non-empty system output', function()
-      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
+  describe('buf_repo_dir', function()
+    it('returns repo root for a buffer inside a git repo', function()
+      helpers.expand_results['%:p:h'] = '/home/user/project/src'
+      helpers.set_system_response('rev-parse --show-toplevel', '/home/user/project\n')
 
-      assert.is_true(utils.in_github_repo())
+      assert.equals('/home/user/project', utils.buf_repo_dir())
     end)
 
-    it('returns false and notifies for empty system output', function()
-      -- default mock returns '' when no pattern matches
-      assert.is_false(utils.in_github_repo())
-      assert.equals(1, #helpers.notifications)
-      assert.truthy(helpers.notifications[1].msg:find('GitHub repository'))
+    it('returns nil when buffer has no file', function()
+      helpers.expand_results['%:p:h'] = ''
+
+      assert.is_nil(utils.buf_repo_dir())
+    end)
+
+    it('returns nil when not in a git repo', function()
+      helpers.expand_results['%:p:h'] = '/tmp/no-repo'
+      helpers.set_system_response('rev-parse --show-toplevel', 'fatal: not a git repository\n', 128)
+
+      assert.is_nil(utils.buf_repo_dir())
+    end)
+  end)
+
+  describe('buf_relative_path', function()
+    it('returns path relative to repo root', function()
+      helpers.expand_results['%:p'] = '/home/user/project/src/main.lua'
+
+      assert.equals('src/main.lua', utils.buf_relative_path('/home/user/project'))
+    end)
+
+    it('returns nil when buffer has no file', function()
+      helpers.expand_results['%:p'] = ''
+
+      assert.is_nil(utils.buf_relative_path('/home/user/project'))
     end)
   end)
 
   describe('is_commit', function()
     it('returns true for clean rev-parse output', function()
-      helpers.set_system_response('git rev-parse', 'abc123def456\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('rev-parse --verify', 'abc123def456\n')
 
       assert.is_true(utils.is_commit('abc123def456'))
     end)
 
     it('returns false when output contains fatal', function()
-      helpers.set_system_response('git rev-parse', 'fatal: Needed a single revision\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('rev-parse --verify', 'fatal: Needed a single revision\n')
 
       assert.is_false(utils.is_commit('not-a-commit'))
+    end)
+
+    it('returns false when not in a repo', function()
+      helpers.expand_results['%:p:h'] = ''
+
+      assert.is_false(utils.is_commit('abc123'))
     end)
   end)
 
   describe('open_compare', function()
     before_each(function()
-      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('git branch', 'feature-branch\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('branch --show-current', 'feature-branch\n')
     end)
 
     it('constructs compare URL and opens it', function()
@@ -81,12 +117,23 @@ describe('gh-navigator.utils', function()
       assert.equals('+', helpers.last_register)
       assert.equals('https://github.com/owner/repo/compare/feature-branch', helpers.last_register_value)
     end)
+
+    it('notifies when not in a repo', function()
+      helpers.expand_results['%:p:h'] = ''
+
+      utils.open_compare(false)
+
+      assert.is_nil(helpers.opened_url)
+      assert.equals(1, #helpers.notifications)
+      assert.truthy(helpers.notifications[1].msg:find('Not in a Git repository'))
+    end)
   end)
 
   describe('open_blame', function()
     before_each(function()
-      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('git branch', 'main\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('branch --show-current', 'main\n')
     end)
 
     it('constructs blame URL and opens it', function()
@@ -111,7 +158,8 @@ describe('gh-navigator.utils', function()
 
   describe('open_commit', function()
     it('opens commit URL from gh browse', function()
-      helpers.set_system_response('gh browse', 'https://github.com/owner/repo/commit/abc123\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('browse', 'https://github.com/owner/repo/commit/abc123\n')
 
       utils.open_commit('abc123', false)
 
@@ -119,7 +167,8 @@ describe('gh-navigator.utils', function()
     end)
 
     it('copies commit URL to clipboard with bang', function()
-      helpers.set_system_response('gh browse', 'https://github.com/owner/repo/commit/abc123\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('browse', 'https://github.com/owner/repo/commit/abc123\n')
 
       utils.open_commit('abc123', true)
 
@@ -130,7 +179,8 @@ describe('gh-navigator.utils', function()
 
   describe('open_file', function()
     it('opens file URL from gh browse', function()
-      helpers.set_system_response('gh browse', 'https://github.com/owner/repo/blob/main/lua/init.lua\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('browse', 'https://github.com/owner/repo/blob/main/lua/init.lua\n')
 
       utils.open_file('lua/init.lua', false)
 
@@ -138,7 +188,8 @@ describe('gh-navigator.utils', function()
     end)
 
     it('copies file URL to clipboard with bang', function()
-      helpers.set_system_response('gh browse', 'https://github.com/owner/repo/blob/main/lua/init.lua\n')
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('browse', 'https://github.com/owner/repo/blob/main/lua/init.lua\n')
 
       utils.open_file('lua/init.lua', true)
 
@@ -148,8 +199,12 @@ describe('gh-navigator.utils', function()
   end)
 
   describe('open_pr', function()
+    before_each(function()
+      mock_buf_repo('/mock/repo')
+    end)
+
     it('opens PR by number', function()
-      helpers.set_system_response('gh pr view', '{"url":"https://github.com/owner/repo/pull/42"}')
+      helpers.set_system_response('pr view', '{"url":"https://github.com/owner/repo/pull/42"}')
 
       utils.open_pr('42', false)
 
@@ -157,7 +212,7 @@ describe('gh-navigator.utils', function()
     end)
 
     it('copies PR URL to clipboard with bang when numeric', function()
-      helpers.set_system_response('gh pr view', '{"url":"https://github.com/owner/repo/pull/42"}')
+      helpers.set_system_response('pr view', '{"url":"https://github.com/owner/repo/pull/42"}')
 
       utils.open_pr('42', true)
 
@@ -169,7 +224,7 @@ describe('gh-navigator.utils', function()
       local results = vim.json.encode({
         { number = 1, title = 'Fix bug', author = { name = 'Alice' }, url = 'https://github.com/owner/repo/pull/1' },
       })
-      helpers.set_system_response('gh pr list', results)
+      helpers.set_system_response('pr list', results)
 
       utils.open_pr('fix bug', false)
 
@@ -181,7 +236,7 @@ describe('gh-navigator.utils', function()
         { number = 1, title = 'Fix bug A', author = { name = 'Alice' }, url = 'https://github.com/owner/repo/pull/1' },
         { number = 2, title = 'Fix bug B', author = { name = 'Bob' }, url = 'https://github.com/owner/repo/pull/2' },
       })
-      helpers.set_system_response('gh pr list', results)
+      helpers.set_system_response('pr list', results)
 
       utils.open_pr('fix bug', false)
 
@@ -191,7 +246,7 @@ describe('gh-navigator.utils', function()
     end)
 
     it('notifies when no search results found', function()
-      helpers.set_system_response('gh pr list', '[]')
+      helpers.set_system_response('pr list', '[]')
 
       utils.open_pr('nonexistent', false)
 
@@ -200,7 +255,7 @@ describe('gh-navigator.utils', function()
     end)
 
     it('notifies when PR number not found (Could not resolve)', function()
-      helpers.set_system_response('gh pr view', 'Could not resolve to a PullRequest')
+      helpers.set_system_response('pr view', 'Could not resolve to a PullRequest')
 
       utils.open_pr('999', false)
 
@@ -210,8 +265,12 @@ describe('gh-navigator.utils', function()
   end)
 
   describe('open_repo', function()
+    before_each(function()
+      mock_buf_repo('/mock/repo')
+    end)
+
     it('opens repo URL with path appended', function()
-      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
 
       utils.open_repo('issues', false)
 
@@ -219,7 +278,7 @@ describe('gh-navigator.utils', function()
     end)
 
     it('copies repo URL to clipboard with bang', function()
-      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
 
       utils.open_repo('pulls', true)
 
@@ -228,7 +287,7 @@ describe('gh-navigator.utils', function()
     end)
 
     it('opens repo root with empty path', function()
-      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
 
       utils.open_repo('', false)
 
@@ -236,7 +295,7 @@ describe('gh-navigator.utils', function()
     end)
 
     it('notifies error when no git remotes found', function()
-      helpers.set_system_response('gh repo view', 'no git remotes found')
+      helpers.set_system_response('repo view', 'no git remotes found')
 
       utils.open_repo('issues', false)
 
