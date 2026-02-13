@@ -9,19 +9,19 @@ function M.setup()
 
   local function buf_filename(args)
     local filename = args[1] or ''
+    local dir = utils.buf_repo_dir()
     if filename == '' then
-      local dir = utils.buf_repo_dir()
       if not dir then
         utils.not_in_repo_notify()
-        return nil
+        return nil, nil
       end
       filename = utils.buf_relative_path(dir)
     end
-    return filename
+    return filename, dir
   end
 
   local function blame(args, opts)
-    local filename = buf_filename(args)
+    local filename, dir = buf_filename(args)
     if not filename then
       return
     end
@@ -29,11 +29,11 @@ function M.setup()
     if opts.range ~= 0 then
       filename = filename .. '#' .. 'L' .. opts.line1 .. '-' .. 'L' .. opts.line2
     end
-    utils.open_blame(filename, opts.bang)
+    utils.open_blame(filename, opts.bang, dir)
   end
 
   local function browse(args, opts)
-    local filename = buf_filename(args)
+    local filename, dir = buf_filename(args)
     if not filename then
       return
     end
@@ -41,7 +41,7 @@ function M.setup()
     if opts.range ~= 0 then
       filename = filename .. ':' .. opts.line1 .. '-' .. opts.line2
     end
-    utils.open_file(filename, opts.bang)
+    utils.open_file(filename, opts.bang, dir)
   end
 
   local function pr(args, opts)
@@ -111,6 +111,19 @@ function M.setup()
     },
   }
 
+  local function resolve_commit_or_pr(arg, bang)
+    local dir = utils.buf_repo_dir()
+    if not dir then
+      return utils.not_in_repo_notify()
+    end
+
+    if utils.is_commit(arg, dir) then
+      utils.open_commit(arg, bang, dir)
+    else
+      utils.open_pr(arg, bang, dir)
+    end
+  end
+
   local function gh_cmd(opts)
     local fargs = opts.fargs
 
@@ -121,22 +134,13 @@ function M.setup()
         arg = vim.fn.expand('<cword>')
       end
 
-      if utils.is_commit(arg) then
-        utils.open_commit(arg, opts.bang)
-      else
-        utils.open_pr(arg, opts.bang)
-      end
+      resolve_commit_or_pr(arg, opts.bang)
     else
       local subcommand_key = fargs[1]
       local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}
       local subcommand = subcommand_tbl[subcommand_key]
       if not subcommand then
-        local arg = opts.args
-        if utils.is_commit(arg) then
-          utils.open_commit(arg, opts.bang)
-        else
-          utils.open_pr(arg, opts.bang)
-        end
+        resolve_commit_or_pr(opts.args, opts.bang)
         return
       end
       subcommand.call(args, opts)

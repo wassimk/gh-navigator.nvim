@@ -122,8 +122,8 @@ function M.buf_relative_path(repo_dir)
   return abs_path
 end
 
-function M.open_compare(bang)
-  local dir = M.buf_repo_dir()
+function M.open_compare(bang, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return M.not_in_repo_notify()
   end
@@ -132,8 +132,8 @@ function M.open_compare(bang)
   open_or_copy(url, bang)
 end
 
-function M.open_blame(filename, bang)
-  local dir = M.buf_repo_dir()
+function M.open_blame(filename, bang, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return M.not_in_repo_notify()
   end
@@ -142,8 +142,8 @@ function M.open_blame(filename, bang)
   open_or_copy(url, bang)
 end
 
-function M.open_commit(sha, bang)
-  local dir = M.buf_repo_dir()
+function M.open_commit(sha, bang, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return M.not_in_repo_notify()
   end
@@ -153,8 +153,8 @@ function M.open_commit(sha, bang)
   open_or_copy(url, bang)
 end
 
-function M.open_file(filename, bang)
-  local dir = M.buf_repo_dir()
+function M.open_file(filename, bang, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return M.not_in_repo_notify()
   end
@@ -164,8 +164,8 @@ function M.open_file(filename, bang)
   open_or_copy(url, bang)
 end
 
-function M.open_pr(number_or_query, bang)
-  local dir = M.buf_repo_dir()
+function M.open_pr(number_or_query, bang, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return M.not_in_repo_notify()
   end
@@ -177,8 +177,8 @@ function M.open_pr(number_or_query, bang)
   end
 end
 
-function M.open_repo(path, bang)
-  local dir = M.buf_repo_dir()
+function M.open_repo(path, bang, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return M.not_in_repo_notify()
   end
@@ -187,14 +187,14 @@ function M.open_repo(path, bang)
   local result = vim.fn.system(cmd)
 
   if not string.find(result, 'no git remotes found') then
-    open_or_copy(repo_url(dir) .. '/' .. path, bang)
+    open_or_copy(vim.json.decode(result).url .. '/' .. path, bang)
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
   end
 end
 
-function M.is_commit(arg)
-  local dir = M.buf_repo_dir()
+function M.is_commit(arg, dir)
+  dir = dir or M.buf_repo_dir()
   if not dir then
     return false
   end
