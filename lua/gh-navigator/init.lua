@@ -54,6 +54,10 @@ function M.setup()
     utils.open_repo(arg, opts.bang)
   end
 
+  local function compare(_, opts)
+    utils.open_compare(opts.bang)
+  end
+
   local subcommand_tbl = {
     browse = {
       call = function(args, opts)
@@ -63,6 +67,11 @@ function M.setup()
     blame = {
       call = function(args, opts)
         blame(args, opts)
+      end,
+    },
+    compare = {
+      call = function(args, opts)
+        compare(args, opts)
       end,
     },
     pr = {

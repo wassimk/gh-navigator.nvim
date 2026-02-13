@@ -63,6 +63,26 @@ describe('gh-navigator.utils', function()
     end)
   end)
 
+  describe('open_compare', function()
+    before_each(function()
+      helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('git branch', 'feature-branch\n')
+    end)
+
+    it('constructs compare URL and opens it', function()
+      utils.open_compare(false)
+
+      assert.equals('https://github.com/owner/repo/compare/feature-branch', helpers.opened_url)
+    end)
+
+    it('copies compare URL to clipboard with bang', function()
+      utils.open_compare(true)
+
+      assert.equals('+', helpers.last_register)
+      assert.equals('https://github.com/owner/repo/compare/feature-branch', helpers.last_register_value)
+    end)
+  end)
+
   describe('open_blame', function()
     before_each(function()
       helpers.set_system_response('gh repo view', '{"url":"https://github.com/owner/repo"}')

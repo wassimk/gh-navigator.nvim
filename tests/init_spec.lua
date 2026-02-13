@@ -39,6 +39,9 @@ describe('gh-navigator', function()
     utils.open_repo = function(path, bang)
       table.insert(spy_calls, { fn = 'open_repo', args = { path, bang } })
     end
+    utils.open_compare = function(bang)
+      table.insert(spy_calls, { fn = 'open_compare', args = { bang } })
+    end
 
     -- Capture the command callback and completion function
     local orig_create = vim.api.nvim_create_user_command
@@ -222,6 +225,21 @@ describe('gh-navigator', function()
       assert.equals('42', prs[1].args[1])
     end)
 
+    it('dispatches compare subcommand to open_compare', function()
+      captured_gh_cmd({
+        args = 'compare',
+        fargs = { 'compare' },
+        bang = false,
+        range = 0,
+        line1 = 0,
+        line2 = 0,
+      })
+
+      local compares = calls_to('open_compare')
+      assert.equals(1, #compares)
+      assert.is_false(compares[1].args[1])
+    end)
+
     it('dispatches repo subcommand to open_repo', function()
       captured_gh_cmd({
         args = 'repo issues',
@@ -347,7 +365,7 @@ describe('gh-navigator', function()
 
       assert.is_not_nil(result)
       table.sort(result)
-      assert.same({ 'blame', 'browse', 'pr', 'repo' }, result)
+      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo' }, result)
     end)
 
     it('filters subcommands by prefix', function()
@@ -370,7 +388,7 @@ describe('gh-navigator', function()
 
       assert.is_not_nil(result)
       table.sort(result)
-      assert.same({ 'blame', 'browse', 'pr', 'repo' }, result)
+      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo' }, result)
     end)
 
     it('returns all subcommands with bang', function()
@@ -378,7 +396,7 @@ describe('gh-navigator', function()
 
       assert.is_not_nil(result)
       table.sort(result)
-      assert.same({ 'blame', 'browse', 'pr', 'repo' }, result)
+      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo' }, result)
     end)
 
     it('returns nil for subcommand without completer', function()

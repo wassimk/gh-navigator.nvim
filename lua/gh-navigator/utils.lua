@@ -81,6 +81,16 @@ local function open_pr_by_search(query, bang)
   end
 end
 
+function M.open_compare(bang)
+  local url = repo_url() .. '/compare/' .. current_branch()
+
+  if bang then
+    copy_to_clipboard(url)
+  else
+    vim.ui.open(url)
+  end
+end
+
 function M.open_blame(filename, bang)
   local url = blame_url(filename)
 
