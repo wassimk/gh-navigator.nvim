@@ -94,31 +94,39 @@ local function open_pr_by_search(query, bang, dir)
   end
 end
 
+local function repo_root_for_dir(dir)
+  local result = vim.trim(vim.fn.system('git -C ' .. vim.fn.shellescape(dir) .. ' rev-parse --show-toplevel'))
+  if vim.v.shell_error ~= 0 then
+    return nil
+  end
+  return result
+end
+
 function M.buf_repo_dir()
+  -- Try the current buffer's file path first.
   local buf_dir = vim.fn.expand('%:p:h')
-  if buf_dir == '' then
-    -- Current buffer has no file (e.g., floating/scratch buffer).
-    -- Fall back to the first normal window's buffer.
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      if vim.api.nvim_win_get_config(win).relative == '' then
-        local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
-        if name ~= '' then
-          buf_dir = vim.fn.fnamemodify(name, ':h')
-          break
+  if buf_dir ~= '' then
+    local root = repo_root_for_dir(buf_dir)
+    if root then
+      return root
+    end
+  end
+
+  -- Current buffer has no file or is not in a repo (e.g., floating/scratch buffer).
+  -- Fall back to the first normal window's buffer.
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_config(win).relative == '' then
+      local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
+      if name ~= '' then
+        local root = repo_root_for_dir(vim.fn.fnamemodify(name, ':h'))
+        if root then
+          return root
         end
       end
     end
   end
-  if buf_dir == '' then
-    return nil
-  end
 
-  local result = vim.trim(vim.fn.system('git -C ' .. vim.fn.shellescape(buf_dir) .. ' rev-parse --show-toplevel'))
-  if vim.v.shell_error ~= 0 then
-    return nil
-  end
-
-  return result
+  return nil
 end
 
 function M.buf_relative_path(repo_dir)

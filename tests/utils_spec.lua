@@ -92,7 +92,64 @@ describe('gh-navigator.utils', function()
       helpers.expand_results['%:p:h'] = '/tmp/no-repo'
       helpers.set_system_response('rev-parse --show-toplevel', 'fatal: not a git repository\n', 128)
 
+      vim.api.nvim_list_wins = function()
+        return {}
+      end
+
       assert.is_nil(utils.buf_repo_dir())
+    end)
+
+    it('falls back to normal window when current buffer path is not in a repo', function()
+      helpers.expand_results['%:p:h'] = '/tmp/scratch'
+
+      local call_count = 0
+      vim.fn.system = function(cmd)
+        local cmd_str = type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
+        call_count = call_count + 1
+        if call_count == 1 then
+          -- First call: current buffer's dir fails
+          assert.truthy(cmd_str:find('/tmp/scratch'))
+          vim.v = setmetatable(vim.v or {}, {
+            __index = function(_, key)
+              if key == 'shell_error' then
+                return 128
+              end
+            end,
+          })
+          return 'fatal: not a git repository\n'
+        else
+          -- Second call: normal window's buffer succeeds
+          vim.v = setmetatable(vim.v or {}, {
+            __index = function(_, key)
+              if key == 'shell_error' then
+                return 0
+              end
+            end,
+          })
+          return '/home/user/project\n'
+        end
+      end
+
+      vim.api.nvim_list_wins = function()
+        return { 1001 }
+      end
+      vim.api.nvim_win_get_config = function(_)
+        return { relative = '' }
+      end
+      vim.api.nvim_win_get_buf = function(_)
+        return 42
+      end
+      vim.api.nvim_buf_get_name = function(_)
+        return '/home/user/project/src/main.lua'
+      end
+      vim.fn.fnamemodify = function(name, mod)
+        if mod == ':h' then
+          return name:match('(.+)/[^/]+$') or name
+        end
+        return name
+      end
+
+      assert.equals('/home/user/project', utils.buf_repo_dir())
     end)
 
     it('returns nil when float and no normal windows have files', function()
