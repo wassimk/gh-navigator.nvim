@@ -117,7 +117,12 @@ function M.setup()
       local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}
       local subcommand = subcommand_tbl[subcommand_key]
       if not subcommand then
-        vim.notify('Unknown command: ' .. subcommand_key, vim.log.levels.ERROR, { title = 'GH Navigator' })
+        local arg = opts.args
+        if utils.is_commit(arg) then
+          utils.open_commit(arg, opts.bang)
+        else
+          utils.open_pr(arg, opts.bang)
+        end
         return
       end
       subcommand.call(args, opts)
