@@ -76,7 +76,8 @@ local function open_pr_by_number(number, bang, dir)
 end
 
 local function open_pr_by_search(query, bang, dir)
-  local result = run_gh(dir, { 'pr', 'list', '--search', query, '--state', 'merged', '--json', 'number,title,author,url' })
+  local result =
+    run_gh(dir, { 'pr', 'list', '--search', query, '--state', 'merged', '--json', 'number,title,author,url' })
   local results = vim.json.decode(result.stdout)
 
   if vim.tbl_count(results) == 1 then
