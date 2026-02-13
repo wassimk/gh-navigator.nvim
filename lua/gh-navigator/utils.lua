@@ -9,19 +9,45 @@ local function copy_to_clipboard(url)
   vim.notify('Copied to clipboard: ' .. url, vim.log.levels.INFO, { title = 'gh-navigator' })
 end
 
-local function current_branch()
-  return vim.trim(vim.fn.system('git branch --show-current'))
+local function open_or_copy(url, bang)
+  if bang then
+    copy_to_clipboard(url)
+  else
+    vim.ui.open(url)
+  end
 end
 
-local function repo_url()
-  local gh_cmd = 'gh repo view --json url'
-  local result = vim.fn.system(gh_cmd)
+local function git_cmd(dir, args)
+  if dir then
+    return 'git -C ' .. vim.fn.shellescape(dir) .. ' ' .. args
+  end
+  return 'git ' .. args
+end
+
+local function gh_cmd(dir, args)
+  if dir then
+    return 'cd ' .. vim.fn.shellescape(dir) .. ' && gh ' .. args
+  end
+  return 'gh ' .. args
+end
+
+local function current_branch(dir)
+  return vim.trim(vim.fn.system(git_cmd(dir, 'branch --show-current')))
+end
+
+local function repo_url(dir)
+  local cmd = gh_cmd(dir, 'repo view --json url')
+  local result = vim.fn.system(cmd)
 
   return vim.json.decode(result).url
 end
 
-local function blame_url(filename)
-  return repo_url() .. '/blame/' .. current_branch() .. '/' .. filename
+local function blame_url(filename, dir)
+  return repo_url(dir) .. '/blame/' .. current_branch(dir) .. '/' .. filename
+end
+
+function M.not_in_repo_notify()
+  vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'gh-navigator' })
 end
 
 local function ui_select_pr(prs, bang)
@@ -39,41 +65,28 @@ local function ui_select_pr(prs, bang)
     end,
   }, function(choice)
     if choice ~= nil then
-      if bang then
-        return copy_to_clipboard(choice.url)
-      else
-        return vim.ui.open(choice.url)
-      end
+      open_or_copy(choice.url, bang)
     end
   end)
 end
 
-local function open_pr_by_number(number, bang)
-  local gh_cmd = 'gh pr view ' .. number .. ' --json url'
-  local result = vim.fn.system(gh_cmd)
+local function open_pr_by_number(number, bang, dir)
+  local cmd = gh_cmd(dir, 'pr view ' .. number .. ' --json url')
+  local result = vim.fn.system(cmd)
 
   if not string.find(result, 'Could not resolve') then
-    local url = vim.json.decode(result).url
-    if bang then
-      copy_to_clipboard(url)
-    else
-      vim.ui.open(url)
-    end
+    open_or_copy(vim.json.decode(result).url, bang)
   else
     vim.notify('PR #' .. number .. ' not found', vim.log.INFO, { title = 'GHPR' })
   end
 end
 
-local function open_pr_by_search(query, bang)
-  local gh_cmd = 'gh pr list --search "' .. query .. '" --state merged --json number,title,author,url'
-  local results = vim.json.decode(vim.fn.system(gh_cmd))
+local function open_pr_by_search(query, bang, dir)
+  local cmd = gh_cmd(dir, 'pr list --search "' .. query .. '" --state merged --json number,title,author,url')
+  local results = vim.json.decode(vim.fn.system(cmd))
 
   if vim.tbl_count(results) == 1 then
-    if bang then
-      copy_to_clipboard(results[1].url)
-    else
-      vim.ui.open(results[1].url)
-    end
+    open_or_copy(results[1].url, bang)
   elseif vim.tbl_count(results) > 1 then
     ui_select_pr(results, bang)
   else
@@ -81,74 +94,133 @@ local function open_pr_by_search(query, bang)
   end
 end
 
-function M.open_compare(bang)
-  local url = repo_url() .. '/compare/' .. current_branch()
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
+local function repo_root_for_dir(dir)
+  local result = vim.trim(vim.fn.system('git -C ' .. vim.fn.shellescape(dir) .. ' rev-parse --show-toplevel'))
+  if vim.v.shell_error ~= 0 then
+    return nil
   end
+  return result
 end
 
-function M.open_blame(filename, bang)
-  local url = blame_url(filename)
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
+function M.buf_repo_dir()
+  -- Try the current buffer's file path first.
+  local buf_dir = vim.fn.expand('%:p:h')
+  if buf_dir ~= '' then
+    local root = repo_root_for_dir(buf_dir)
+    if root then
+      return root
+    end
   end
+
+  -- Current buffer has no file or is not in a repo (e.g., floating/scratch buffer).
+  -- Fall back to the first normal window's buffer.
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_config(win).relative == '' then
+      local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
+      if name ~= '' then
+        local root = repo_root_for_dir(vim.fn.fnamemodify(name, ':h'))
+        if root then
+          return root
+        end
+      end
+    end
+  end
+
+  return nil
 end
 
-function M.open_commit(sha, bang)
-  local gh_cmd = 'gh browse ' .. sha .. ' -n'
-  local url = vim.trim(vim.fn.system(gh_cmd))
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
+function M.buf_relative_path(repo_dir)
+  local abs_path = vim.fn.expand('%:p')
+  if abs_path == '' then
+    return nil
   end
+
+  local prefix = repo_dir .. '/'
+  if abs_path:sub(1, #prefix) == prefix then
+    return abs_path:sub(#prefix + 1)
+  end
+
+  return abs_path
 end
 
-function M.open_file(filename, bang)
-  local gh_cmd = 'gh browse ' .. filename .. ' -n'
-  local url = vim.trim(vim.fn.system(gh_cmd))
-
-  if bang then
-    copy_to_clipboard(url)
-  else
-    vim.ui.open(url)
+function M.open_compare(bang, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return M.not_in_repo_notify()
   end
+
+  local url = repo_url(dir) .. '/compare/' .. current_branch(dir)
+  open_or_copy(url, bang)
 end
 
-function M.open_pr(number_or_query, bang)
+function M.open_blame(filename, bang, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return M.not_in_repo_notify()
+  end
+
+  local url = blame_url(filename, dir)
+  open_or_copy(url, bang)
+end
+
+function M.open_commit(sha, bang, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return M.not_in_repo_notify()
+  end
+
+  local cmd = gh_cmd(dir, 'browse ' .. sha .. ' -n')
+  local url = vim.trim(vim.fn.system(cmd))
+  open_or_copy(url, bang)
+end
+
+function M.open_file(filename, bang, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return M.not_in_repo_notify()
+  end
+
+  local cmd = gh_cmd(dir, 'browse ' .. filename .. ' -n')
+  local url = vim.trim(vim.fn.system(cmd))
+  open_or_copy(url, bang)
+end
+
+function M.open_pr(number_or_query, bang, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return M.not_in_repo_notify()
+  end
+
   if tonumber(number_or_query) then
-    open_pr_by_number(number_or_query, bang)
+    open_pr_by_number(number_or_query, bang, dir)
   else
-    open_pr_by_search(number_or_query, bang)
+    open_pr_by_search(number_or_query, bang, dir)
   end
 end
 
-function M.open_repo(path, bang)
-  local gh_cmd = 'gh repo view --json url'
-  local result = vim.fn.system(gh_cmd)
+function M.open_repo(path, bang, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return M.not_in_repo_notify()
+  end
+
+  local cmd = gh_cmd(dir, 'repo view --json url')
+  local result = vim.fn.system(cmd)
 
   if not string.find(result, 'no git remotes found') then
-    local url = repo_url() .. '/' .. path
-    if bang then
-      copy_to_clipboard(url)
-    else
-      vim.ui.open(url)
-    end
+    open_or_copy(vim.json.decode(result).url .. '/' .. path, bang)
   else
     vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'gh-navigator' })
   end
 end
 
-function M.is_commit(arg)
-  local result = vim.fn.system('git rev-parse --verify ' .. arg)
+function M.is_commit(arg, dir)
+  dir = dir or M.buf_repo_dir()
+  if not dir then
+    return false
+  end
+
+  local result = vim.fn.system(git_cmd(dir, 'rev-parse --verify ' .. arg))
 
   if string.find(result, 'fatal') then
     return false
@@ -166,12 +238,4 @@ function M.gh_cli_installed()
   end
 end
 
-function M.in_github_repo()
-  if vim.fn.system('gh repo view --json url 2>/dev/null') == '' then
-    vim.notify('gh-navigator expects to be in a GitHub repository', vim.log.ERROR, { title = 'gh-navigator' })
-    return false
-  else
-    return true
-  end
-end
 return M
