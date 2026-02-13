@@ -34,9 +34,6 @@ Install via your preferred plugin manager. The following example uses [lazy.nvim
 }
 ```
 
-> [!IMPORTANT]
-> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
-
 ## Usage
 
 The plugin provides a single `:GH` command with sub-commands. Tab completion is available for all sub-commands and their arguments.
@@ -86,8 +83,19 @@ The plugin detects the Git repository from the current buffer's file path, not f
 No keymaps are set by default. Here are some examples:
 
 ```lua
+-- Open and navigate
 vim.keymap.set('n', '<leader>go', '<cmd>GH<cr>', { desc = 'GH: open commit or PR' })
 vim.keymap.set('n', '<leader>gf', '<cmd>GH browse<cr>', { desc = 'GH: browse file' })
 vim.keymap.set('n', '<leader>gb', '<cmd>GH blame<cr>', { desc = 'GH: blame file' })
+vim.keymap.set('n', '<leader>gc', '<cmd>GH compare<cr>', { desc = 'GH: compare branch' })
+
+-- Visual mode (line ranges)
+vim.keymap.set('v', '<leader>gf', ':GH browse<cr>', { desc = 'GH: browse selection' })
 vim.keymap.set('v', '<leader>gb', ':GH blame<cr>', { desc = 'GH: blame selection' })
+
+-- Copy URL to clipboard (! variant)
+vim.keymap.set('n', '<leader>gF', '<cmd>GH! browse<cr>', { desc = 'GH: copy file URL' })
+vim.keymap.set('n', '<leader>gB', '<cmd>GH! blame<cr>', { desc = 'GH: copy blame URL' })
+vim.keymap.set('v', '<leader>gF', ':GH! browse<cr>', { desc = 'GH: copy selection URL' })
+vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame selection URL' })
 ```
