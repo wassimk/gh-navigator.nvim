@@ -126,26 +126,28 @@ function M.setup()
   end
 
   local function gh_cmd(opts)
-    local fargs = opts.fargs
+    utils.async_run(function()
+      local fargs = opts.fargs
 
-    if #fargs == 0 then
-      local arg = opts.args
+      if #fargs == 0 then
+        local arg = opts.args
 
-      if arg == '' then
-        arg = vim.fn.expand('<cword>')
+        if arg == '' then
+          arg = vim.fn.expand('<cword>')
+        end
+
+        resolve_commit_or_pr(arg, opts.bang)
+      else
+        local subcommand_key = fargs[1]
+        local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}
+        local subcommand = subcommand_tbl[subcommand_key]
+        if not subcommand then
+          resolve_commit_or_pr(opts.args, opts.bang)
+          return
+        end
+        subcommand.call(args, opts)
       end
-
-      resolve_commit_or_pr(arg, opts.bang)
-    else
-      local subcommand_key = fargs[1]
-      local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}
-      local subcommand = subcommand_tbl[subcommand_key]
-      if not subcommand then
-        resolve_commit_or_pr(opts.args, opts.bang)
-        return
-      end
-      subcommand.call(args, opts)
-    end
+    end)
   end
 
   vim.api.nvim_create_user_command('GH', gh_cmd, {
