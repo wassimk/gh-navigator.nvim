@@ -128,6 +128,13 @@ vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame sel
 
 ## Development
 
+Run tests and lint:
+
+```shell
+make test
+make lint
+```
+
 Enable the local git hooks (one-time setup):
 
 ```shell
