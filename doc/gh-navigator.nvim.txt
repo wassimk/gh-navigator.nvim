@@ -4,8 +4,8 @@
 Table of Contents                        *gh-navigator.nvim-table-of-contents*
 
 1. gh-navigator.nvim                     |gh-navigator.nvim-gh-navigator.nvim|
-  - Usage                          |gh-navigator.nvim-gh-navigator.nvim-usage|
   - Setup                          |gh-navigator.nvim-gh-navigator.nvim-setup|
+  - Usage                          |gh-navigator.nvim-gh-navigator.nvim-usage|
 2. Links                                             |gh-navigator.nvim-links|
 
 ==============================================================================
@@ -17,6 +17,38 @@ Neovim buffer.
 <https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml>
 
 
+SETUP                              *gh-navigator.nvim-gh-navigator.nvim-setup*
+
+
+PREREQUISITES ~
+
+- **Neovim 0.10+**
+- **GitHub CLI** (`gh`) — installed and authenticated
+
+>shell
+    brew install gh
+    gh auth login
+<
+
+
+INSTALLATION ~
+
+Install via your preferred plugin manager. The following example uses lazy.nvim
+<https://github.com/folke/lazy.nvim>.
+
+>lua
+    {
+      'wassimk/gh-navigator.nvim',
+      version = "*",
+      config = true
+    }
+<
+
+
+  [!IMPORTANT] This plugin is actively developed on the `main` branch. I
+  recommend using versioned releases with the _version_ key to avoid unexpected
+  breaking changes.
+
 USAGE                              *gh-navigator.nvim-gh-navigator.nvim-usage*
 
 The plugin provides a single `:GH` command. The fastest way to use it is with
@@ -25,19 +57,10 @@ no sub-command at all — it figures out what you mean.
 
 THE BARE GH COMMAND ~
 
-Place your cursor on a commit SHA or PR number and run `:GH` with no arguments.
-The word under the cursor is used automatically.
-
->vim
-    " Cursor on a SHA → opens the commit on GitHub
-    GH
-    
-    " Cursor on a number → opens the matching PR
-    GH
-<
-
-You can also pass an argument directly. `GH` tries to interpret it as a commit
-SHA first, then falls back to a PR search.
+Place your cursor on a commit SHA or PR number and run `:GH` with no arguments
+— the word under the cursor is used automatically. You can also pass an
+argument directly. `GH` tries to interpret it as a commit SHA first, then falls
+back to a PR search.
 
 >vim
     GH eef4a114e0bacc929d8335ef52b1b859d40097f4
@@ -158,38 +181,6 @@ No keymaps are set by default. Here are some examples:
     vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame selection URL' })
 <
 
-
-SETUP                              *gh-navigator.nvim-gh-navigator.nvim-setup*
-
-
-PREREQUISITES ~
-
-- **Neovim 0.10+**
-- **GitHub CLI** (`gh`) — installed and authenticated
-
->shell
-    brew install gh
-    gh auth login
-<
-
-
-INSTALLATION ~
-
-Install via your preferred plugin manager. The following example uses lazy.nvim
-<https://github.com/folke/lazy.nvim>.
-
->lua
-    {
-      'wassimk/gh-navigator.nvim',
-      version = "*",
-      config = true
-    }
-<
-
-
-  [!IMPORTANT] This plugin is actively developed on the `main` branch. I
-  recommend using versioned releases with the _version_ key to avoid unexpected
-  breaking changes.
 ==============================================================================
 2. Links                                             *gh-navigator.nvim-links*
 
