@@ -185,6 +185,13 @@ No keymaps are set by default. Here are some examples:
 
 DEVELOPMENT                  *gh-navigator.nvim-gh-navigator.nvim-development*
 
+Run tests and lint:
+
+>shell
+    make test
+    make lint
+<
+
 Enable the local git hooks (one-time setup):
 
 >shell
