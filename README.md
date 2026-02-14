@@ -28,6 +28,9 @@ Install via your preferred plugin manager. The following example uses [lazy.nvim
 }
 ```
 
+> [!IMPORTANT]
+> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
+
 ## Usage
 
 The plugin provides a single `:GH` command with sub-commands. Tab completion is available for all sub-commands and their arguments.
