@@ -198,20 +198,20 @@ describe('gh-navigator.utils', function()
     before_each(function()
       mock_buf_repo('/mock/repo')
       helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('branch --show-current', 'feature-branch\n')
+      helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
     end)
 
-    it('constructs compare URL and opens it', function()
+    it('constructs compare URL with commit SHA and opens it', function()
       utils.open_compare(false)
 
-      assert.equals('https://github.com/owner/repo/compare/feature-branch', helpers.opened_url)
+      assert.equals('https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2', helpers.opened_url)
     end)
 
     it('copies compare URL to clipboard with bang', function()
       utils.open_compare(true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals('https://github.com/owner/repo/compare/feature-branch', helpers.last_register_value)
+      assert.equals('https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2', helpers.last_register_value)
     end)
 
     it('notifies when not in a repo', function()
@@ -222,18 +222,6 @@ describe('gh-navigator.utils', function()
       assert.is_nil(helpers.opened_url)
       assert.equals(1, #helpers.notifications)
       assert.truthy(helpers.notifications[1].msg:find('Not in a Git repository'))
-    end)
-
-    it('falls back to short SHA on detached HEAD', function()
-      helpers.clear_system_responses()
-      mock_buf_repo('/mock/repo')
-      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('branch --show-current', '\n')
-      helpers.set_system_response('rev-parse --short', 'a1b2c3d\n')
-
-      utils.open_compare(false)
-
-      assert.equals('https://github.com/owner/repo/compare/a1b2c3d', helpers.opened_url)
     end)
 
     it('notifies when gh repo view fails', function()
@@ -253,38 +241,26 @@ describe('gh-navigator.utils', function()
     before_each(function()
       mock_buf_repo('/mock/repo')
       helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('branch --show-current', 'main\n')
+      helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
     end)
 
-    it('constructs blame URL and opens it', function()
+    it('constructs blame URL with commit SHA and opens it', function()
       utils.open_blame('lua/init.lua', false)
 
-      assert.equals('https://github.com/owner/repo/blame/main/lua/init.lua', helpers.opened_url)
+      assert.equals('https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua', helpers.opened_url)
     end)
 
     it('copies blame URL to clipboard with bang', function()
       utils.open_blame('lua/init.lua', true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals('https://github.com/owner/repo/blame/main/lua/init.lua', helpers.last_register_value)
+      assert.equals('https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua', helpers.last_register_value)
     end)
 
     it('includes line range fragment in URL', function()
       utils.open_blame('lua/init.lua#L5-L10', false)
 
-      assert.equals('https://github.com/owner/repo/blame/main/lua/init.lua#L5-L10', helpers.opened_url)
-    end)
-
-    it('falls back to short SHA on detached HEAD', function()
-      helpers.clear_system_responses()
-      mock_buf_repo('/mock/repo')
-      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('branch --show-current', '\n')
-      helpers.set_system_response('rev-parse --short', 'a1b2c3d\n')
-
-      utils.open_blame('lua/init.lua', false)
-
-      assert.equals('https://github.com/owner/repo/blame/a1b2c3d/lua/init.lua', helpers.opened_url)
+      assert.equals('https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua#L5-L10', helpers.opened_url)
     end)
 
     it('notifies when gh repo view fails', function()
@@ -341,25 +317,28 @@ describe('gh-navigator.utils', function()
   describe('open_file', function()
     it('opens file URL from gh browse', function()
       mock_buf_repo('/mock/repo')
-      helpers.set_system_response('browse', 'https://github.com/owner/repo/blob/main/lua/init.lua\n')
+      helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
+      helpers.set_system_response('browse', 'https://github.com/owner/repo/blob/a1b2c3d4/lua/init.lua\n')
 
       utils.open_file('lua/init.lua', false)
 
-      assert.equals('https://github.com/owner/repo/blob/main/lua/init.lua', helpers.opened_url)
+      assert.equals('https://github.com/owner/repo/blob/a1b2c3d4/lua/init.lua', helpers.opened_url)
     end)
 
     it('copies file URL to clipboard with bang', function()
       mock_buf_repo('/mock/repo')
-      helpers.set_system_response('browse', 'https://github.com/owner/repo/blob/main/lua/init.lua\n')
+      helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
+      helpers.set_system_response('browse', 'https://github.com/owner/repo/blob/a1b2c3d4/lua/init.lua\n')
 
       utils.open_file('lua/init.lua', true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals('https://github.com/owner/repo/blob/main/lua/init.lua', helpers.last_register_value)
+      assert.equals('https://github.com/owner/repo/blob/a1b2c3d4/lua/init.lua', helpers.last_register_value)
     end)
 
     it('notifies when gh browse fails', function()
       mock_buf_repo('/mock/repo')
+      helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
       helpers.set_system_response('browse', '', 1)
 
       utils.open_file('nonexistent.lua', false)

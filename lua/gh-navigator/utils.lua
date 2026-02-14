@@ -51,16 +51,9 @@ local function run_gh(dir, args)
   return run_cmd('gh', dir, args)
 end
 
-local function current_branch(dir)
-  local result = run_git(dir, { 'branch', '--show-current' })
-  local branch = vim.trim(result.stdout)
-  if branch ~= '' then
-    return branch
-  end
-
-  -- Detached HEAD — fall back to the short commit SHA
-  local rev_result = run_git(dir, { 'rev-parse', '--short', 'HEAD' })
-  return vim.trim(rev_result.stdout)
+local function github_ref(dir)
+  local result = run_git(dir, { 'rev-parse', 'HEAD' })
+  return vim.trim(result.stdout)
 end
 
 local function repo_url(dir)
@@ -80,7 +73,7 @@ local function blame_url(filename, dir)
   if not url then
     return nil
   end
-  return url .. '/blame/' .. current_branch(dir) .. '/' .. filename
+  return url .. '/blame/' .. github_ref(dir) .. '/' .. filename
 end
 
 function M.not_in_repo_notify()
@@ -191,7 +184,7 @@ function M.open_compare(bang, dir)
     return gh_repo_error_notify()
   end
 
-  open_or_copy(url .. '/compare/' .. current_branch(dir), bang)
+  open_or_copy(url .. '/compare/' .. github_ref(dir), bang)
 end
 
 function M.open_blame(filename, bang, dir)
@@ -228,7 +221,8 @@ function M.open_file(filename, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local result = run_gh(dir, { 'browse', filename, '-n' })
+  local ref = github_ref(dir)
+  local result = run_gh(dir, { 'browse', filename, '-n', '--branch', ref })
   if result.code ~= 0 then
     return gh_repo_error_notify()
   end
