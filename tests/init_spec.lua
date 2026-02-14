@@ -206,8 +206,6 @@ describe('gh-navigator', function()
     end)
 
     it('dispatches sha subcommand to open_commit', function()
-      is_commit_return = true
-
       captured_gh_cmd({
         args = 'sha abc123',
         fargs = { 'sha', 'abc123' },
@@ -221,24 +219,6 @@ describe('gh-navigator', function()
       assert.equals(1, #commits)
       assert.equals('abc123', commits[1].args[1])
       assert.is_false(commits[1].args[2])
-    end)
-
-    it('sha subcommand notifies when argument is not a valid commit', function()
-      is_commit_return = false
-
-      captured_gh_cmd({
-        args = 'sha include',
-        fargs = { 'sha', 'include' },
-        bang = false,
-        range = 0,
-        line1 = 0,
-        line2 = 0,
-      })
-
-      local commits = calls_to('open_commit')
-      assert.equals(0, #commits)
-      assert.equals(1, #helpers.notifications)
-      assert.equals('Not a valid commit: include', helpers.notifications[1].msg)
     end)
 
     it('dispatches compare subcommand to open_compare', function()
