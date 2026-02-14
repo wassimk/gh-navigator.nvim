@@ -6,23 +6,40 @@ Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neo
 
 <!-- TODO: demo GIF -->
 
+## Setup
+
+### Prerequisites
+
+- **Neovim 0.10+**
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
+
+```shell
+brew install gh
+gh auth login
+```
+
+### Installation
+
+Install via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
+
+```lua
+{
+  'wassimk/gh-navigator.nvim',
+  version = "*",
+  config = true
+}
+```
+
+> [!IMPORTANT]
+> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
+
 ## Usage
 
 The plugin provides a single `:GH` command. The fastest way to use it is with no sub-command at all — it figures out what you mean.
 
 ### The Bare `GH` Command
 
-Place your cursor on a commit SHA or PR number and run `:GH` with no arguments. The word under the cursor is used automatically.
-
-```vim
-" Cursor on a SHA → opens the commit on GitHub
-GH
-
-" Cursor on a number → opens the matching PR
-GH
-```
-
-You can also pass an argument directly. `GH` tries to interpret it as a commit SHA first, then falls back to a PR search.
+Place your cursor on a commit SHA or PR number and run `:GH` with no arguments — the word under the cursor is used automatically. You can also pass an argument directly. `GH` tries to interpret it as a commit SHA first, then falls back to a PR search.
 
 ```vim
 GH eef4a114e0bacc929d8335ef52b1b859d40097f4
@@ -108,30 +125,3 @@ vim.keymap.set('n', '<leader>gB', '<cmd>GH! blame<cr>', { desc = 'GH: copy blame
 vim.keymap.set('v', '<leader>gF', ':GH! browse<cr>', { desc = 'GH: copy selection URL' })
 vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame selection URL' })
 ```
-
-## Setup
-
-### Prerequisites
-
-- **Neovim 0.10+**
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
-
-```shell
-brew install gh
-gh auth login
-```
-
-### Installation
-
-Install via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
-
-```lua
-{
-  'wassimk/gh-navigator.nvim',
-  version = "*",
-  config = true
-}
-```
-
-> [!IMPORTANT]
-> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
