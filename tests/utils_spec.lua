@@ -204,20 +204,14 @@ describe('gh-navigator.utils', function()
     it('constructs compare URL with branch name and opens it', function()
       utils.open_compare(false)
 
-      assert.equals(
-        'https://github.com/owner/repo/compare/my-feature-branch',
-        helpers.opened_url
-      )
+      assert.equals('https://github.com/owner/repo/compare/my-feature-branch', helpers.opened_url)
     end)
 
     it('copies compare URL to clipboard with bang', function()
       utils.open_compare(true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals(
-        'https://github.com/owner/repo/compare/my-feature-branch',
-        helpers.last_register_value
-      )
+      assert.equals('https://github.com/owner/repo/compare/my-feature-branch', helpers.last_register_value)
     end)
 
     it('notifies when not in a repo', function()
