@@ -28,23 +28,3 @@ jobs:
       - name: Run tests
         run: make test
         timeout-minutes: 5
-  docs:
-    name: vimdoc
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: kdheepak/panvimdoc@main
-        with:
-          vimdoc: gh-navigator.nvim
-          version: "NVIM v0.10.0"
-          toc: true
-          treesitter: true
-          docmappingprojectname: false
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        if: github.ref == 'refs/heads/main'
-        with:
-          commit_message: "build(docs): auto generate vim documentation"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-          branch: "main"
