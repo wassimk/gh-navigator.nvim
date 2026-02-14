@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Only run when README.md is staged
+if ! git diff --cached --name-only | grep -q '^README\.md$'; then
+  exit 0
+fi
+
+# Check for pandoc dependency
+if ! command -v pandoc &>/dev/null; then
+  echo "WARNING: pandoc is not installed — skipping vimdoc generation."
+  echo "Install pandoc to auto-generate doc/gh-navigator.nvim.txt from README.md."
+  exit 0
+fi
+
+echo "README.md changed — regenerating vimdoc..."
+
+if make docs; then
+  git add doc/gh-navigator.nvim.txt
+else
+  echo "ERROR: vimdoc generation failed."
+  exit 1
+fi

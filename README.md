@@ -125,3 +125,13 @@ vim.keymap.set('n', '<leader>gB', '<cmd>GH! blame<cr>', { desc = 'GH: copy blame
 vim.keymap.set('v', '<leader>gF', ':GH! browse<cr>', { desc = 'GH: copy selection URL' })
 vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame selection URL' })
 ```
+
+## Development
+
+Enable the local git hooks (one-time setup):
+
+```shell
+git config core.hooksPath .githooks
+```
+
+This activates a pre-commit hook that auto-generates `doc/gh-navigator.nvim.txt` from `README.md` whenever the README is staged. Requires [pandoc](https://pandoc.org/installing.html).
