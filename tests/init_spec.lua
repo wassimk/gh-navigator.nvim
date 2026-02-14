@@ -205,6 +205,22 @@ describe('gh-navigator', function()
       assert.equals('42', prs[1].args[1])
     end)
 
+    it('dispatches sha subcommand to open_commit', function()
+      captured_gh_cmd({
+        args = 'sha abc123',
+        fargs = { 'sha', 'abc123' },
+        bang = false,
+        range = 0,
+        line1 = 0,
+        line2 = 0,
+      })
+
+      local commits = calls_to('open_commit')
+      assert.equals(1, #commits)
+      assert.equals('abc123', commits[1].args[1])
+      assert.is_false(commits[1].args[2])
+    end)
+
     it('dispatches compare subcommand to open_compare', function()
       captured_gh_cmd({
         args = 'compare',
@@ -345,7 +361,7 @@ describe('gh-navigator', function()
 
       assert.is_not_nil(result)
       table.sort(result)
-      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo' }, result)
+      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo', 'sha' }, result)
     end)
 
     it('filters subcommands by prefix', function()
@@ -368,7 +384,7 @@ describe('gh-navigator', function()
 
       assert.is_not_nil(result)
       table.sort(result)
-      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo' }, result)
+      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo', 'sha' }, result)
     end)
 
     it('returns all subcommands with bang', function()
@@ -376,7 +392,7 @@ describe('gh-navigator', function()
 
       assert.is_not_nil(result)
       table.sort(result)
-      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo' }, result)
+      assert.same({ 'blame', 'browse', 'compare', 'pr', 'repo', 'sha' }, result)
     end)
 
     it('returns nil for subcommand without completer', function()

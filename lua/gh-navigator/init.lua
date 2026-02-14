@@ -53,6 +53,15 @@ function M.setup()
     utils.open_pr(arg, opts.bang)
   end
 
+  local function sha(args, opts)
+    local arg = args[1] or ''
+
+    if arg == '' then
+      arg = vim.fn.expand('<cword>')
+    end
+    utils.open_commit(arg, opts.bang)
+  end
+
   local function repo(args, opts)
     local arg = args and args[1] or ''
 
@@ -82,6 +91,11 @@ function M.setup()
     pr = {
       call = function(args, opts)
         pr(args, opts)
+      end,
+    },
+    sha = {
+      call = function(args, opts)
+        sha(args, opts)
       end,
     },
     repo = {
