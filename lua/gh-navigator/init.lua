@@ -79,35 +79,13 @@ function M.setup()
   end
 
   local subcommand_tbl = {
-    browse = {
-      call = function(args, opts)
-        browse(args, opts)
-      end,
-    },
-    blame = {
-      call = function(args, opts)
-        blame(args, opts)
-      end,
-    },
-    compare = {
-      call = function(args, opts)
-        compare(args, opts)
-      end,
-    },
-    pr = {
-      call = function(args, opts)
-        pr(args, opts)
-      end,
-    },
-    sha = {
-      call = function(args, opts)
-        sha(args, opts)
-      end,
-    },
+    browse = { call = browse },
+    blame = { call = blame },
+    compare = { call = compare },
+    pr = { call = pr },
+    sha = { call = sha },
     repo = {
-      call = function(args, opts)
-        repo(args, opts)
-      end,
+      call = repo,
       complete = function(subcmd_arg_lead)
         local repo_args = {
           'actions',

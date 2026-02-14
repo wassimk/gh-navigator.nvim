@@ -357,6 +357,17 @@ describe('gh-navigator.utils', function()
       assert.equals('+', helpers.last_register)
       assert.equals('https://github.com/owner/repo/blob/main/lua/init.lua', helpers.last_register_value)
     end)
+
+    it('notifies when gh browse fails', function()
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('browse', '', 1)
+
+      utils.open_file('nonexistent.lua', false)
+
+      assert.is_nil(helpers.opened_url)
+      assert.equals(1, #helpers.notifications)
+      assert.truthy(helpers.notifications[1].msg:find('Could not determine GitHub repository URL'))
+    end)
   end)
 
   describe('open_pr', function()
@@ -424,6 +435,32 @@ describe('gh-navigator.utils', function()
       assert.truthy(helpers.notifications[1].msg:find('not found'))
     end)
 
+    it('includes PRs of all states in search results', function()
+      local results = vim.json.encode({
+        { number = 1, title = 'Merged PR', author = { name = 'Alice' }, url = 'https://github.com/owner/repo/pull/1' },
+        { number = 2, title = 'Closed PR', author = { name = 'Bob' }, url = 'https://github.com/owner/repo/pull/2' },
+        { number = 3, title = 'Open PR', author = { name = 'Carol' }, url = 'https://github.com/owner/repo/pull/3' },
+      })
+      helpers.set_system_response('pr list', results)
+
+      utils.open_pr('fix bug', false)
+
+      assert.equals(3, #helpers.select_items)
+      -- auto-selects first item
+      assert.equals('https://github.com/owner/repo/pull/1', helpers.opened_url)
+    end)
+
+    it('handles PR with nil author gracefully', function()
+      local results = vim.json.encode({
+        { number = 1, title = 'Orphaned PR', author = vim.NIL, url = 'https://github.com/owner/repo/pull/1' },
+      })
+      helpers.set_system_response('pr list', results)
+
+      utils.open_pr('orphaned', false)
+
+      assert.equals('https://github.com/owner/repo/pull/1', helpers.opened_url)
+    end)
+
     it('treats commit sha with scientific notation chars as search query', function()
       local results = vim.json.encode({
         { number = 1, title = 'Old commit', author = { name = 'Alice' }, url = 'https://github.com/owner/repo/pull/1' },
@@ -483,7 +520,7 @@ describe('gh-navigator.utils', function()
 
       assert.is_nil(helpers.opened_url)
       assert.equals(1, #helpers.notifications)
-      assert.truthy(helpers.notifications[1].msg:find('Not in a GitHub'))
+      assert.truthy(helpers.notifications[1].msg:find('Could not determine GitHub repository URL'))
     end)
   end)
 end)
