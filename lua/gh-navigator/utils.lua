@@ -91,12 +91,7 @@ local function ui_select_pr(prs, bang)
   vim.ui.select(prs, {
     prompt = 'Select a PR:',
     format_item = function(pr)
-      local author = ''
-      if pr.author.name then
-        author = pr.author.name
-      else
-        author = 'Unknown Author'
-      end
+      local author = (pr.author and pr.author.name) or 'Unknown Author'
 
       return '#' .. tostring(pr.number) .. ' ' .. pr.title .. ' - ' .. author
     end,
@@ -118,8 +113,7 @@ local function open_pr_by_number(number, bang, dir)
 end
 
 local function open_pr_by_search(query, bang, dir)
-  local result =
-    run_gh(dir, { 'pr', 'list', '--search', query, '--state', 'merged', '--json', 'number,title,author,url' })
+  local result = run_gh(dir, { 'pr', 'list', '--search', query, '--state', 'all', '--json', 'number,title,author,url' })
 
   if result.code ~= 0 then
     vim.notify('PR search failed for: ' .. query, vim.log.levels.ERROR, { title = 'GH Navigator' })
@@ -235,6 +229,10 @@ function M.open_file(filename, bang, dir)
   end
 
   local result = run_gh(dir, { 'browse', filename, '-n' })
+  if result.code ~= 0 then
+    return gh_repo_error_notify()
+  end
+
   local url = vim.trim(result.stdout)
   open_or_copy(url, bang)
 end
@@ -258,17 +256,15 @@ function M.open_repo(path, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local result = run_gh(dir, { 'repo', 'view', '--json', 'url' })
-
-  if result.code == 0 then
-    local url = vim.json.decode(result.stdout).url
-    if path ~= '' then
-      url = url .. '/' .. path
-    end
-    open_or_copy(url, bang)
-  else
-    vim.notify('Not in a GitHub hosted repository', vim.log.levels.ERROR, { title = 'GH Navigator' })
+  local url = repo_url(dir)
+  if not url then
+    return gh_repo_error_notify()
   end
+
+  if path ~= '' then
+    url = url .. '/' .. path
+  end
+  open_or_copy(url, bang)
 end
 
 function M.is_commit(arg, dir)
