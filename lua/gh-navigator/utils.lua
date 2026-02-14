@@ -53,16 +53,34 @@ end
 
 local function current_branch(dir)
   local result = run_git(dir, { 'branch', '--show-current' })
-  return vim.trim(result.stdout)
+  local branch = vim.trim(result.stdout)
+  if branch ~= '' then
+    return branch
+  end
+
+  -- Detached HEAD — fall back to the short commit SHA
+  local rev_result = run_git(dir, { 'rev-parse', '--short', 'HEAD' })
+  return vim.trim(rev_result.stdout)
 end
 
 local function repo_url(dir)
   local result = run_gh(dir, { 'repo', 'view', '--json', 'url' })
+  if result.code ~= 0 then
+    return nil
+  end
   return vim.json.decode(result.stdout).url
 end
 
+local function gh_repo_error_notify()
+  vim.notify('Could not determine GitHub repository URL', vim.log.levels.ERROR, { title = 'GH Navigator' })
+end
+
 local function blame_url(filename, dir)
-  return repo_url(dir) .. '/blame/' .. current_branch(dir) .. '/' .. filename
+  local url = repo_url(dir)
+  if not url then
+    return nil
+  end
+  return url .. '/blame/' .. current_branch(dir) .. '/' .. filename
 end
 
 function M.not_in_repo_notify()
@@ -102,6 +120,12 @@ end
 local function open_pr_by_search(query, bang, dir)
   local result =
     run_gh(dir, { 'pr', 'list', '--search', query, '--state', 'merged', '--json', 'number,title,author,url' })
+
+  if result.code ~= 0 then
+    vim.notify('PR search failed for: ' .. query, vim.log.levels.ERROR, { title = 'GH Navigator' })
+    return
+  end
+
   local results = vim.json.decode(result.stdout)
 
   if vim.tbl_count(results) == 1 then
@@ -168,8 +192,12 @@ function M.open_compare(bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local url = repo_url(dir) .. '/compare/' .. current_branch(dir)
-  open_or_copy(url, bang)
+  local url = repo_url(dir)
+  if not url then
+    return gh_repo_error_notify()
+  end
+
+  open_or_copy(url .. '/compare/' .. current_branch(dir), bang)
 end
 
 function M.open_blame(filename, bang, dir)
@@ -179,6 +207,10 @@ function M.open_blame(filename, bang, dir)
   end
 
   local url = blame_url(filename, dir)
+  if not url then
+    return gh_repo_error_notify()
+  end
+
   open_or_copy(url, bang)
 end
 
@@ -188,8 +220,12 @@ function M.open_commit(sha, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local url = repo_url(dir) .. '/commit/' .. sha
-  open_or_copy(url, bang)
+  local url = repo_url(dir)
+  if not url then
+    return gh_repo_error_notify()
+  end
+
+  open_or_copy(url .. '/commit/' .. sha, bang)
 end
 
 function M.open_file(filename, bang, dir)
@@ -224,10 +260,14 @@ function M.open_repo(path, bang, dir)
 
   local result = run_gh(dir, { 'repo', 'view', '--json', 'url' })
 
-  if not string.find(result.stdout, 'no git remotes found') then
-    open_or_copy(vim.json.decode(result.stdout).url .. '/' .. path, bang)
+  if result.code == 0 then
+    local url = vim.json.decode(result.stdout).url
+    if path ~= '' then
+      url = url .. '/' .. path
+    end
+    open_or_copy(url, bang)
   else
-    vim.notify('Not in a GitHub hosted repository', vim.log.ERROR, { title = 'GH Navigator' })
+    vim.notify('Not in a GitHub hosted repository', vim.log.levels.ERROR, { title = 'GH Navigator' })
   end
 end
 
@@ -243,7 +283,7 @@ end
 
 function M.gh_cli_installed()
   if vim.fn.executable('gh') == 0 then
-    vim.notify('gh-navigator requires the GitHub CLI to be installed', vim.log.ERROR, { title = 'GH Navigator' })
+    vim.notify('gh-navigator requires the GitHub CLI to be installed', vim.log.levels.ERROR, { title = 'GH Navigator' })
     return false
   else
     return true
