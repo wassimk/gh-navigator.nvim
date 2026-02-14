@@ -204,14 +204,20 @@ describe('gh-navigator.utils', function()
     it('constructs compare URL with commit SHA and opens it', function()
       utils.open_compare(false)
 
-      assert.equals('https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2', helpers.opened_url)
+      assert.equals(
+        'https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+        helpers.opened_url
+      )
     end)
 
     it('copies compare URL to clipboard with bang', function()
       utils.open_compare(true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals('https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2', helpers.last_register_value)
+      assert.equals(
+        'https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+        helpers.last_register_value
+      )
     end)
 
     it('notifies when not in a repo', function()
@@ -247,20 +253,29 @@ describe('gh-navigator.utils', function()
     it('constructs blame URL with commit SHA and opens it', function()
       utils.open_blame('lua/init.lua', false)
 
-      assert.equals('https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua', helpers.opened_url)
+      assert.equals(
+        'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua',
+        helpers.opened_url
+      )
     end)
 
     it('copies blame URL to clipboard with bang', function()
       utils.open_blame('lua/init.lua', true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals('https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua', helpers.last_register_value)
+      assert.equals(
+        'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua',
+        helpers.last_register_value
+      )
     end)
 
     it('includes line range fragment in URL', function()
       utils.open_blame('lua/init.lua#L5-L10', false)
 
-      assert.equals('https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua#L5-L10', helpers.opened_url)
+      assert.equals(
+        'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua#L5-L10',
+        helpers.opened_url
+      )
     end)
 
     it('notifies when gh repo view fails', function()
