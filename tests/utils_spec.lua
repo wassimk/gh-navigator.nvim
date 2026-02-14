@@ -358,6 +358,17 @@ describe('gh-navigator.utils', function()
       assert.equals(1, #helpers.notifications)
       assert.truthy(helpers.notifications[1].msg:find('not found'))
     end)
+
+    it('treats commit sha with scientific notation chars as search query', function()
+      local results = vim.json.encode({
+        { number = 1, title = 'Old commit', author = { name = 'Alice' }, url = 'https://github.com/owner/repo/pull/1' },
+      })
+      helpers.set_system_response('pr list', results)
+
+      utils.open_pr('36e54817', false)
+
+      assert.equals('https://github.com/owner/repo/pull/1', helpers.opened_url)
+    end)
   end)
 
   describe('open_repo', function()

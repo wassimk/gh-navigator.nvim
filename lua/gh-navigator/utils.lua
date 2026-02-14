@@ -186,7 +186,7 @@ function M.open_pr(number_or_query, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  if tonumber(number_or_query) then
+  if number_or_query:match('^%d+$') then
     open_pr_by_number(number_or_query, bang, dir)
   else
     open_pr_by_search(number_or_query, bang, dir)
