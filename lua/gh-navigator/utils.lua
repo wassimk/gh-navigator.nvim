@@ -188,8 +188,7 @@ function M.open_commit(sha, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local result = run_gh(dir, { 'browse', sha, '-n' })
-  local url = vim.trim(result.stdout)
+  local url = repo_url(dir) .. '/commit/' .. sha
   open_or_copy(url, bang)
 end
 
