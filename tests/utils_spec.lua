@@ -223,6 +223,30 @@ describe('gh-navigator.utils', function()
       assert.equals(1, #helpers.notifications)
       assert.truthy(helpers.notifications[1].msg:find('Not in a Git repository'))
     end)
+
+    it('falls back to short SHA on detached HEAD', function()
+      helpers.clear_system_responses()
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('branch --show-current', '\n')
+      helpers.set_system_response('rev-parse --short', 'a1b2c3d\n')
+
+      utils.open_compare(false)
+
+      assert.equals('https://github.com/owner/repo/compare/a1b2c3d', helpers.opened_url)
+    end)
+
+    it('notifies when gh repo view fails', function()
+      helpers.clear_system_responses()
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '', 1)
+
+      utils.open_compare(false)
+
+      assert.is_nil(helpers.opened_url)
+      assert.equals(1, #helpers.notifications)
+      assert.truthy(helpers.notifications[1].msg:find('Could not determine GitHub repository URL'))
+    end)
   end)
 
   describe('open_blame', function()
@@ -250,6 +274,30 @@ describe('gh-navigator.utils', function()
 
       assert.equals('https://github.com/owner/repo/blame/main/lua/init.lua#L5-L10', helpers.opened_url)
     end)
+
+    it('falls back to short SHA on detached HEAD', function()
+      helpers.clear_system_responses()
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
+      helpers.set_system_response('branch --show-current', '\n')
+      helpers.set_system_response('rev-parse --short', 'a1b2c3d\n')
+
+      utils.open_blame('lua/init.lua', false)
+
+      assert.equals('https://github.com/owner/repo/blame/a1b2c3d/lua/init.lua', helpers.opened_url)
+    end)
+
+    it('notifies when gh repo view fails', function()
+      helpers.clear_system_responses()
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '', 1)
+
+      utils.open_blame('lua/init.lua', false)
+
+      assert.is_nil(helpers.opened_url)
+      assert.equals(1, #helpers.notifications)
+      assert.truthy(helpers.notifications[1].msg:find('Could not determine GitHub repository URL'))
+    end)
   end)
 
   describe('open_commit', function()
@@ -275,6 +323,18 @@ describe('gh-navigator.utils', function()
       utils.open_commit('36234615', false)
 
       assert.equals('https://github.com/owner/repo/commit/36234615', helpers.opened_url)
+    end)
+
+    it('notifies when gh repo view fails', function()
+      helpers.clear_system_responses()
+      mock_buf_repo('/mock/repo')
+      helpers.set_system_response('repo view', '', 1)
+
+      utils.open_commit('abc123', false)
+
+      assert.is_nil(helpers.opened_url)
+      assert.equals(1, #helpers.notifications)
+      assert.truthy(helpers.notifications[1].msg:find('Could not determine GitHub repository URL'))
     end)
   end)
 
@@ -374,6 +434,16 @@ describe('gh-navigator.utils', function()
 
       assert.equals('https://github.com/owner/repo/pull/1', helpers.opened_url)
     end)
+
+    it('notifies when pr search command fails', function()
+      helpers.set_system_response('pr list', '', 1)
+
+      utils.open_pr('some query', false)
+
+      assert.is_nil(helpers.opened_url)
+      assert.equals(1, #helpers.notifications)
+      assert.truthy(helpers.notifications[1].msg:find('PR search failed'))
+    end)
   end)
 
   describe('open_repo', function()
@@ -403,14 +473,15 @@ describe('gh-navigator.utils', function()
 
       utils.open_repo('', false)
 
-      assert.equals('https://github.com/owner/repo/', helpers.opened_url)
+      assert.equals('https://github.com/owner/repo', helpers.opened_url)
     end)
 
-    it('notifies error when no git remotes found', function()
-      helpers.set_system_response('repo view', 'no git remotes found')
+    it('notifies error when gh repo view fails', function()
+      helpers.set_system_response('repo view', '', 1)
 
       utils.open_repo('issues', false)
 
+      assert.is_nil(helpers.opened_url)
       assert.equals(1, #helpers.notifications)
       assert.truthy(helpers.notifications[1].msg:find('Not in a GitHub'))
     end)
