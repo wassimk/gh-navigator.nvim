@@ -28,22 +28,22 @@ function M.setup_mocks()
     notify = vim.notify,
   }
 
-  -- Pattern-matched vim.system mock
-  vim.system = function(cmd, _)
+  -- Pattern-matched vim.system mock (supports optional on_exit callback)
+  vim.system = function(cmd, _, on_exit)
     local cmd_str = table.concat(cmd, ' ')
+    local result = { stdout = '', stderr = '', code = 0 }
     for _, entry in ipairs(_system_patterns) do
       if cmd_str:find(entry.pattern, 1, true) then
-        local code = entry.exit_code or 0
-        return {
-          wait = function()
-            return { stdout = entry.response, stderr = '', code = code }
-          end,
-        }
+        result = { stdout = entry.response, stderr = '', code = entry.exit_code or 0 }
+        break
       end
+    end
+    if on_exit then
+      on_exit(result)
     end
     return {
       wait = function()
-        return { stdout = '', stderr = '', code = 0 }
+        return result
       end,
     }
   end

@@ -17,14 +17,38 @@ local function open_or_copy(url, bang)
   end
 end
 
+local async_coroutines = setmetatable({}, { __mode = 'k' })
+
+local function safe_resume(co, ...)
+  local ok, err = coroutine.resume(co, ...)
+  if not ok then
+    vim.notify('GH Navigator: ' .. tostring(err), vim.log.levels.ERROR, { title = 'GH Navigator' })
+  end
+end
+
+local function run_cmd(exe, dir, args)
+  local cmd = vim.list_extend({ exe }, args)
+  local opts = { cwd = dir, text = true }
+
+  local co = coroutine.running()
+  if not co or not async_coroutines[co] then
+    return vim.system(cmd, opts):wait()
+  end
+
+  vim.system(cmd, opts, function(result)
+    vim.schedule(function()
+      safe_resume(co, result)
+    end)
+  end)
+  return coroutine.yield()
+end
+
 local function run_git(dir, args)
-  local cmd = vim.list_extend({ 'git' }, args)
-  return vim.system(cmd, { cwd = dir, text = true }):wait()
+  return run_cmd('git', dir, args)
 end
 
 local function run_gh(dir, args)
-  local cmd = vim.list_extend({ 'gh' }, args)
-  return vim.system(cmd, { cwd = dir, text = true }):wait()
+  return run_cmd('gh', dir, args)
 end
 
 local function current_branch(dir)
@@ -225,6 +249,12 @@ function M.gh_cli_installed()
   else
     return true
   end
+end
+
+function M.async_run(fn)
+  local co = coroutine.create(fn)
+  async_coroutines[co] = true
+  safe_resume(co)
 end
 
 return M
