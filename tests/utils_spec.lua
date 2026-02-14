@@ -253,23 +253,28 @@ describe('gh-navigator.utils', function()
   end)
 
   describe('open_commit', function()
-    it('opens commit URL from gh browse', function()
+    before_each(function()
       mock_buf_repo('/mock/repo')
-      helpers.set_system_response('browse', 'https://github.com/owner/repo/commit/abc123\n')
+      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
+    end)
 
+    it('constructs commit URL and opens it', function()
       utils.open_commit('abc123', false)
 
       assert.equals('https://github.com/owner/repo/commit/abc123', helpers.opened_url)
     end)
 
     it('copies commit URL to clipboard with bang', function()
-      mock_buf_repo('/mock/repo')
-      helpers.set_system_response('browse', 'https://github.com/owner/repo/commit/abc123\n')
-
       utils.open_commit('abc123', true)
 
       assert.equals('+', helpers.last_register)
       assert.equals('https://github.com/owner/repo/commit/abc123', helpers.last_register_value)
+    end)
+
+    it('handles purely numeric sha without treating it as an issue', function()
+      utils.open_commit('36234615', false)
+
+      assert.equals('https://github.com/owner/repo/commit/36234615', helpers.opened_url)
     end)
   end)
 
