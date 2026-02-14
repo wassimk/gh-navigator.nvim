@@ -4,54 +4,25 @@ Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neo
 
 [![build](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml/badge.svg)](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml) ![release](https://img.shields.io/github/v/release/wassimk/gh-navigator.nvim?logo=github)
 
-## Setup
-
-### Prerequisites
-
-- **Neovim 0.10+**
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
-
-```shell
-brew install gh
-gh auth login
-```
-
-### Installation
-
-Install via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
-
-```lua
-{
-  'wassimk/gh-navigator.nvim',
-  version = "*",
-  config = true
-}
-```
-
-> [!IMPORTANT]
-> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
+<!-- TODO: demo GIF -->
 
 ## Usage
 
-The plugin provides a single `:GH` command with sub-commands. Tab completion is available for all sub-commands and their arguments.
+The plugin provides a single `:GH` command. The fastest way to use it is with no sub-command at all — it figures out what you mean.
 
-### Sub-Commands
+### The Bare `GH` Command
 
-| Sub-Command | Description |
-|--------------------|:---------------|
-| `GH blame` | Opens the current file in GitHub's blame view. |
-| `GH browse` | Opens the current file in GitHub's blob view. |
-| `GH compare` | Opens GitHub's compare view for the current branch against the default branch. |
-| `GH pr <arg>` | Opens a PR by number or search term (e.g., `GH pr 1234` or `GH pr refactor the actor class`). |
-| `GH sha <ref>` | Opens a commit by SHA. Useful when a SHA is purely numeric and would otherwise be treated as a PR number. |
-| `GH repo <path>` | Opens a path in the current repo on GitHub (e.g., `GH repo issues`). Tab-completable paths include *issues*, *pulls*, *actions*, *releases*, etc. |
+Place your cursor on a commit SHA or PR number and run `:GH` with no arguments. The word under the cursor is used automatically.
 
-> [!Note]
-> Both `GH browse` and `GH blame` accept a visual range. Select lines in visual mode (**V**) and run `GH blame` to open the blame view for that selection.
+```vim
+" Cursor on a SHA → opens the commit on GitHub
+GH
 
-### Bare `GH` Command
+" Cursor on a number → opens the matching PR
+GH
+```
 
-When called without a sub-command, `GH` tries to interpret the argument as a commit SHA first, then falls back to a PR search. With no arguments, the word under the cursor is used.
+You can also pass an argument directly. `GH` tries to interpret it as a commit SHA first, then falls back to a PR search.
 
 ```vim
 GH eef4a114e0bacc929d8335ef52b1b859d40097f4
@@ -59,7 +30,28 @@ GH 1234
 GH refactor the actor class
 ```
 
-This is a shortcut — `GH pr <arg>` skips the commit check and searches PRs directly.
+### Explicit Sub-Commands
+
+When you want to skip the inference and be explicit, use a sub-command. Tab completion is available for all sub-commands and their arguments.
+
+| Sub-Command | Description |
+|--------------------|:---------------|
+| `GH blame` | Opens the current file in GitHub's blame view. |
+| `GH browse` | Opens the current file in GitHub's blob view. |
+| `GH compare` | Opens GitHub's compare view for the current branch against the default branch. |
+| `GH pr <arg>` | Opens a PR by number or search term (e.g., `GH pr 1234` or `GH pr refactor the actor class`). Skips the commit check and searches PRs directly. |
+| `GH sha <ref>` | Opens a commit by SHA. Useful when a SHA is purely numeric and would otherwise be treated as a PR number. |
+| `GH repo <path>` | Opens a path in the current repo on GitHub (e.g., `GH repo issues`). Tab-completable paths include *issues*, *pulls*, *actions*, *releases*, etc. |
+
+### Visual Line Ranges
+
+Both `GH browse` and `GH blame` accept a visual range. Select lines in visual mode (**V**) and run the command to open that exact selection on GitHub.
+
+```vim
+" Select lines, then:
+:'<,'>GH browse
+:'<,'>GH blame
+```
 
 ### Copy to Clipboard
 
@@ -70,6 +62,25 @@ GH! pr 1234
 GH! browse
 GH! blame
 GH! repo issues
+```
+
+### Repo Pages
+
+Use `GH repo` to jump to top-level pages of the current repository. Tab completion lists all available paths.
+
+```vim
+GH repo issues
+GH repo pulls
+GH repo actions
+GH repo releases
+```
+
+### Compare
+
+Open GitHub's compare view for the current branch against the default branch.
+
+```vim
+GH compare
 ```
 
 ### Per-Buffer Repo Detection
@@ -97,3 +108,30 @@ vim.keymap.set('n', '<leader>gB', '<cmd>GH! blame<cr>', { desc = 'GH: copy blame
 vim.keymap.set('v', '<leader>gF', ':GH! browse<cr>', { desc = 'GH: copy selection URL' })
 vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame selection URL' })
 ```
+
+## Setup
+
+### Prerequisites
+
+- **Neovim 0.10+**
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
+
+```shell
+brew install gh
+gh auth login
+```
+
+### Installation
+
+Install via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
+
+```lua
+{
+  'wassimk/gh-navigator.nvim',
+  version = "*",
+  config = true
+}
+```
+
+> [!IMPORTANT]
+> This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
