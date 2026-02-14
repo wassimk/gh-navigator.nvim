@@ -59,6 +59,12 @@ function M.setup()
     if arg == '' then
       arg = vim.fn.expand('<cword>')
     end
+
+    if not utils.is_commit(arg) then
+      vim.notify('Not a valid commit: ' .. arg, vim.log.levels.WARN, { title = 'GH Navigator' })
+      return
+    end
+
     utils.open_commit(arg, opts.bang)
   end
 
