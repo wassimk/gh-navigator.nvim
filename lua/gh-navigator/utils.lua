@@ -92,7 +92,7 @@ end
 local function open_pr_by_number(number, bang, dir)
   local result = run_gh(dir, { 'pr', 'view', tostring(number), '--json', 'url' })
 
-  if result.code == 0 then
+  if not string.find(result.stdout, 'Could not resolve') then
     open_or_copy(vim.json.decode(result.stdout).url, bang)
   else
     vim.notify('PR #' .. number .. ' not found', vim.log.levels.INFO, { title = 'GH Navigator' })

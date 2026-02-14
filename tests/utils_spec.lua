@@ -350,8 +350,8 @@ describe('gh-navigator.utils', function()
       assert.truthy(helpers.notifications[1].msg:find('No PR found'))
     end)
 
-    it('notifies when PR number not found', function()
-      helpers.set_system_response('pr view', '', 1)
+    it('notifies when PR number not found (Could not resolve)', function()
+      helpers.set_system_response('pr view', 'Could not resolve to a PullRequest')
 
       utils.open_pr('999', false)
 
