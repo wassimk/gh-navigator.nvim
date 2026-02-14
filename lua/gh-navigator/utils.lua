@@ -56,6 +56,11 @@ local function github_ref(dir)
   return vim.trim(result.stdout)
 end
 
+local function current_branch(dir)
+  local result = run_git(dir, { 'rev-parse', '--abbrev-ref', 'HEAD' })
+  return vim.trim(result.stdout)
+end
+
 local function repo_url(dir)
   local result = run_gh(dir, { 'repo', 'view', '--json', 'url' })
   if result.code ~= 0 then
@@ -184,7 +189,7 @@ function M.open_compare(bang, dir)
     return gh_repo_error_notify()
   end
 
-  open_or_copy(url .. '/compare/' .. github_ref(dir), bang)
+  open_or_copy(url .. '/compare/' .. current_branch(dir), bang)
 end
 
 function M.open_blame(filename, bang, dir)

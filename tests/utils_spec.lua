@@ -198,14 +198,14 @@ describe('gh-navigator.utils', function()
     before_each(function()
       mock_buf_repo('/mock/repo')
       helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
-      helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
+      helpers.set_system_response('rev-parse --abbrev-ref HEAD', 'my-feature-branch\n')
     end)
 
-    it('constructs compare URL with commit SHA and opens it', function()
+    it('constructs compare URL with branch name and opens it', function()
       utils.open_compare(false)
 
       assert.equals(
-        'https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+        'https://github.com/owner/repo/compare/my-feature-branch',
         helpers.opened_url
       )
     end)
@@ -215,7 +215,7 @@ describe('gh-navigator.utils', function()
 
       assert.equals('+', helpers.last_register)
       assert.equals(
-        'https://github.com/owner/repo/compare/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+        'https://github.com/owner/repo/compare/my-feature-branch',
         helpers.last_register_value
       )
     end)
