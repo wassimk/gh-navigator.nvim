@@ -2,9 +2,7 @@
 
 Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neovim buffer.
 
-[![build](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml/badge.svg)](https://github.com/wassimk/gh-navigator.nvim/actions/workflows/build.yml) ![release](https://img.shields.io/github/v/release/wassimk/gh-navigator.nvim?logo=github)
-
-<!-- TODO: demo GIF -->
+![gh-navigator demo](gh-navigator.gif)
 
 ## Setup
 
