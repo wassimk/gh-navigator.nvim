@@ -6,7 +6,7 @@ Table of Contents                        *gh-navigator.nvim-table-of-contents*
 1. gh-navigator.nvim                     |gh-navigator.nvim-gh-navigator.nvim|
   - 📋 Requirements  |gh-navigator.nvim-gh-navigator.nvim-📋-requirements|
   - 🛠️ Installation|gh-navigator.nvim-gh-navigator.nvim-���-️-installation|
-  - ✨ Usage                  |gh-navigator.nvim-gh-navigator.nvim-✨-usage|
+  - 💻 Usage                |gh-navigator.nvim-gh-navigator.nvim-💻-usage|
   - 🔧 Development    |gh-navigator.nvim-gh-navigator.nvim-🔧-development|
 2. Links                                             |gh-navigator.nvim-links|
 
@@ -48,7 +48,7 @@ Install via your preferred plugin manager. The following example uses lazy.nvim
   recommend using versioned releases with the _version_ key to avoid unexpected
   breaking changes.
 
-� USAGE                      *gh-navigator.nvim-gh-navigator.nvim-✨-usage*
+П�� USAGE                    *gh-navigator.nvim-gh-navigator.nvim-💻-usage*
 
 The plugin provides a single `:GH` command. The fastest way to use it is with
 no sub-command at all — it figures out what you mean.
