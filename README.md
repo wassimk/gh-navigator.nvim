@@ -31,7 +31,7 @@ Install via your preferred plugin manager. The following example uses [lazy.nvim
 > [!IMPORTANT]
 > This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
 
-## ✨ Usage
+## 💻 Usage
 
 The plugin provides a single `:GH` command. The fastest way to use it is with no sub-command at all — it figures out what you mean.
 
