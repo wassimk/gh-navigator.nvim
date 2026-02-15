@@ -4,9 +4,10 @@
 Table of Contents                        *gh-navigator.nvim-table-of-contents*
 
 1. gh-navigator.nvim                     |gh-navigator.nvim-gh-navigator.nvim|
-  - Setup                          |gh-navigator.nvim-gh-navigator.nvim-setup|
-  - Usage                          |gh-navigator.nvim-gh-navigator.nvim-usage|
-  - Development              |gh-navigator.nvim-gh-navigator.nvim-development|
+  - 📋 Requirements  |gh-navigator.nvim-gh-navigator.nvim-📋-requirements|
+  - 🛠️ Installation|gh-navigator.nvim-gh-navigator.nvim-���-️-installation|
+  - ✨ Usage                  |gh-navigator.nvim-gh-navigator.nvim-✨-usage|
+  - 🔧 Development    |gh-navigator.nvim-gh-navigator.nvim-🔧-development|
 2. Links                                             |gh-navigator.nvim-links|
 
 ==============================================================================
@@ -18,10 +19,7 @@ Neovim buffer.
 _:GH! copies the URL to the clipboard — without !, it opens in your browser._
 
 
-SETUP                              *gh-navigator.nvim-gh-navigator.nvim-setup*
-
-
-PREREQUISITES ~
+П�� REQUIREMENTS      *gh-navigator.nvim-gh-navigator.nvim-📋-requirements*
 
 - **Neovim 0.10+**
 - **GitHub CLI** (`gh`) — installed and authenticated
@@ -32,7 +30,7 @@ PREREQUISITES ~
 <
 
 
-INSTALLATION ~
+П��ϸ� INSTALLATION*gh-navigator.nvim-gh-navigator.nvim-���-️-installation*
 
 Install via your preferred plugin manager. The following example uses lazy.nvim
 <https://github.com/folke/lazy.nvim>.
@@ -50,7 +48,7 @@ Install via your preferred plugin manager. The following example uses lazy.nvim
   recommend using versioned releases with the _version_ key to avoid unexpected
   breaking changes.
 
-USAGE                              *gh-navigator.nvim-gh-navigator.nvim-usage*
+� USAGE                      *gh-navigator.nvim-gh-navigator.nvim-✨-usage*
 
 The plugin provides a single `:GH` command. The fastest way to use it is with
 no sub-command at all — it figures out what you mean.
@@ -160,7 +158,7 @@ not from Neovim’s working directory. This means you can open Neovim in a
 parent folder and edit files across multiple repos without any issues.
 
 
-KEYMAPS ~
+�ϸ� KEYMAPS ~
 
 No keymaps are set by default. Here are some examples:
 
@@ -183,7 +181,7 @@ No keymaps are set by default. Here are some examples:
 <
 
 
-DEVELOPMENT                  *gh-navigator.nvim-gh-navigator.nvim-development*
+П�� DEVELOPMENT        *gh-navigator.nvim-gh-navigator.nvim-🔧-development*
 
 Run tests and lint:
 

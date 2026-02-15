@@ -6,9 +6,7 @@ Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neo
 
 *`:GH!` copies the URL to the clipboard — without `!`, it opens in your browser.*
 
-## Setup
-
-### Prerequisites
+## 📋 Requirements
 
 - **Neovim 0.10+**
 - **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
@@ -18,7 +16,7 @@ brew install gh
 gh auth login
 ```
 
-### Installation
+## 🛠️ Installation
 
 Install via your preferred plugin manager. The following example uses [lazy.nvim](https://github.com/folke/lazy.nvim).
 
@@ -33,7 +31,7 @@ Install via your preferred plugin manager. The following example uses [lazy.nvim
 > [!IMPORTANT]
 > This plugin is actively developed on the `main` branch. I recommend using versioned releases with the *version* key to avoid unexpected breaking changes.
 
-## Usage
+## ✨ Usage
 
 The plugin provides a single `:GH` command. The fastest way to use it is with no sub-command at all — it figures out what you mean.
 
@@ -104,7 +102,7 @@ GH compare
 
 The plugin detects the Git repository from the current buffer's file path, not from Neovim's working directory. This means you can open Neovim in a parent folder and edit files across multiple repos without any issues.
 
-### Keymaps
+### ⌨️ Keymaps
 
 No keymaps are set by default. Here are some examples:
 
@@ -126,7 +124,7 @@ vim.keymap.set('v', '<leader>gF', ':GH! browse<cr>', { desc = 'GH: copy selectio
 vim.keymap.set('v', '<leader>gB', ':GH! blame<cr>', { desc = 'GH: copy blame selection URL' })
 ```
 
-## Development
+## 🔧 Development
 
 Run tests and lint:
 
