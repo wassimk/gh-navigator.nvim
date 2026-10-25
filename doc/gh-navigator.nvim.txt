@@ -1,4 +1,5 @@
-*gh-navigator.nvim.txt*     For NVIM v0.10.0     Last change: 2026 February 14
+*gh-navigator.nvim.txt*
+                              For NVIM v0.10.0    Last change: 2026 October 25
 
 ==============================================================================
 Table of Contents                        *gh-navigator.nvim-table-of-contents*
@@ -86,11 +87,16 @@ completion is available for all sub-commands and their arguments.
                                           the current branch against the
                                           default branch.
 
-  GH pr <arg>                             Opens a PR by number or search
-                                          term (e.g., GH pr 1234 or
+  GH pr <arg>                             Opens a PR by number, commit SHA,
+                                          or search term (e.g., GH pr 1234,
+                                          GH pr a50a49a8, or
                                           GH pr refactor the actor class).
-                                          Skips the commit check and
-                                          searches PRs directly.
+                                          For a commit SHA, it opens the PR
+                                          that includes that commit. With no
+                                          argument, it uses whatever is
+                                          under the cursor, so GH pr on a
+                                          SHA in a blame popup jumps to its
+                                          PR.
 
   GH sha <ref>                            Opens a commit by SHA. Useful when
                                           a SHA is purely numeric and would
@@ -168,11 +174,11 @@ No keymaps are set by default. Here are some examples:
     vim.keymap.set('n', '<leader>gf', '<cmd>GH browse<cr>', { desc = 'GH: browse file' })
     vim.keymap.set('n', '<leader>gb', '<cmd>GH blame<cr>', { desc = 'GH: blame file' })
     vim.keymap.set('n', '<leader>gc', '<cmd>GH compare<cr>', { desc = 'GH: compare branch' })
-    
+
     -- Visual mode (line ranges)
     vim.keymap.set('v', '<leader>gf', ':GH browse<cr>', { desc = 'GH: browse selection' })
     vim.keymap.set('v', '<leader>gb', ':GH blame<cr>', { desc = 'GH: blame selection' })
-    
+
     -- Copy URL to clipboard (! variant)
     vim.keymap.set('n', '<leader>gF', '<cmd>GH! browse<cr>', { desc = 'GH: copy file URL' })
     vim.keymap.set('n', '<leader>gB', '<cmd>GH! blame<cr>', { desc = 'GH: copy blame URL' })

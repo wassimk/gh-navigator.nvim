@@ -54,7 +54,7 @@ When you want to skip the inference and be explicit, use a sub-command. Tab comp
 | `GH blame` | Opens the current file in GitHub's blame view. |
 | `GH browse` | Opens the current file in GitHub's blob view. |
 | `GH compare` | Opens GitHub's compare view for the current branch against the default branch. |
-| `GH pr <arg>` | Opens a PR by number or search term (e.g., `GH pr 1234` or `GH pr refactor the actor class`). Skips the commit check and searches PRs directly. |
+| `GH pr <arg>` | Opens a PR by number, commit SHA, or search term (e.g., `GH pr 1234`, `GH pr a50a49a8`, or `GH pr refactor the actor class`). For a commit SHA, it opens the PR that includes that commit. With no argument, it uses whatever is under the cursor, so `GH pr` on a SHA in a blame popup jumps to its PR. |
 | `GH sha <ref>` | Opens a commit by SHA. Useful when a SHA is purely numeric and would otherwise be treated as a PR number. |
 | `GH repo <path>` | Opens a path in the current repo on GitHub (e.g., `GH repo issues`). Tab-completable paths include *issues*, *pulls*, *actions*, *releases*, etc. |
 
