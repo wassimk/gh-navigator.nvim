@@ -238,50 +238,49 @@ describe('gh-navigator.utils', function()
   end)
 
   describe('open_blame', function()
+    local blame_url = 'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua'
+
     before_each(function()
       mock_buf_repo('/mock/repo')
-      helpers.set_system_response('repo view', '{"url":"https://github.com/owner/repo"}')
       helpers.set_system_response('rev-parse HEAD', 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n')
     end)
 
-    it('constructs blame URL with commit SHA and opens it', function()
+    it('opens blame URL from gh browse --blame at the commit SHA', function()
+      helpers.set_system_response(
+        'browse lua/init.lua --blame -n --branch a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+        blame_url .. '\n'
+      )
+
       utils.open_blame('lua/init.lua', false)
 
-      assert.equals(
-        'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua',
-        helpers.opened_url
-      )
+      assert.equals(blame_url, helpers.opened_url)
     end)
 
     it('copies blame URL to clipboard with bang', function()
+      helpers.set_system_response('--blame', blame_url .. '\n')
+
       utils.open_blame('lua/init.lua', true)
 
       assert.equals('+', helpers.last_register)
-      assert.equals(
-        'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua',
-        helpers.last_register_value
-      )
+      assert.equals(blame_url, helpers.last_register_value)
     end)
 
-    it('includes line range fragment in URL', function()
-      utils.open_blame('lua/init.lua#L5-L10', false)
+    it('passes line range through to gh browse', function()
+      helpers.set_system_response('browse lua/init.lua:5-10 --blame', blame_url .. '#L5-L10\n')
 
-      assert.equals(
-        'https://github.com/owner/repo/blame/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2/lua/init.lua#L5-L10',
-        helpers.opened_url
-      )
+      utils.open_blame('lua/init.lua:5-10', false)
+
+      assert.equals(blame_url .. '#L5-L10', helpers.opened_url)
     end)
 
-    it('notifies when gh repo view fails', function()
-      helpers.clear_system_responses()
-      mock_buf_repo('/mock/repo')
-      helpers.set_system_response('repo view', '', 1)
+    it('notifies with the gh version requirement when gh browse --blame fails', function()
+      helpers.set_system_response('--blame', '', 1)
 
       utils.open_blame('lua/init.lua', false)
 
       assert.is_nil(helpers.opened_url)
       assert.equals(1, #helpers.notifications)
-      assert.truthy(helpers.notifications[1].msg:find('Could not determine GitHub repository URL'))
+      assert.truthy(helpers.notifications[1].msg:find('requires gh 2.88.0+', 1, true))
     end)
   end)
 

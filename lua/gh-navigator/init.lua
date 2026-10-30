@@ -27,7 +27,7 @@ function M.setup()
     end
 
     if opts.range ~= 0 then
-      filename = filename .. '#' .. 'L' .. opts.line1 .. '-' .. 'L' .. opts.line2
+      filename = filename .. ':' .. opts.line1 .. '-' .. opts.line2
     end
     utils.open_blame(filename, opts.bang, dir)
   end

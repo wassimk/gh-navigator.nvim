@@ -1,5 +1,5 @@
 *gh-navigator.nvim.txt*
-                              For NVIM v0.10.0    Last change: 2026 October 25
+                              For NVIM v0.10.0    Last change: 2026 October 30
 
 ==============================================================================
 Table of Contents                        *gh-navigator.nvim-table-of-contents*
@@ -23,7 +23,7 @@ _:GH! copies the URL to the clipboard — without !, it opens in your browser._
 П�� REQUIREMENTS      *gh-navigator.nvim-gh-navigator.nvim-📋-requirements*
 
 - **Neovim 0.10+**
-- **GitHub CLI** (`gh`) — installed and authenticated
+- **GitHub CLI** (`gh`) 2.88.0+ — installed and authenticated
 
 >shell
     brew install gh
