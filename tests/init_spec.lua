@@ -319,7 +319,7 @@ describe('gh-navigator', function()
 
       local blames = calls_to('open_blame')
       assert.equals(1, #blames)
-      assert.equals('lua/init.lua#L5-L10', blames[1].args[1])
+      assert.equals('lua/init.lua:5-10', blames[1].args[1])
     end)
 
     it('browse includes line range with range opts', function()

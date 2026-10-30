@@ -73,14 +73,6 @@ local function gh_repo_error_notify()
   vim.notify('Could not determine GitHub repository URL', vim.log.levels.ERROR, { title = 'GH Navigator' })
 end
 
-local function blame_url(filename, dir)
-  local url = repo_url(dir)
-  if not url then
-    return nil
-  end
-  return url .. '/blame/' .. github_ref(dir) .. '/' .. filename
-end
-
 function M.not_in_repo_notify()
   vim.notify('Not in a Git repository', vim.log.levels.ERROR, { title = 'GH Navigator' })
 end
@@ -198,11 +190,19 @@ function M.open_blame(filename, bang, dir)
     return M.not_in_repo_notify()
   end
 
-  local url = blame_url(filename, dir)
-  if not url then
-    return gh_repo_error_notify()
+  local ref = github_ref(dir)
+  local result = run_gh(dir, { 'browse', filename, '--blame', '-n', '--branch', ref })
+  if result.code ~= 0 then
+    -- `gh browse --blame` requires gh 2.88.0+, so surface gh's own error.
+    local err = vim.trim(result.stderr or '')
+    return vim.notify(
+      'gh browse --blame failed (requires gh 2.88.0+)' .. (err ~= '' and (': ' .. err) or ''),
+      vim.log.levels.ERROR,
+      { title = 'GH Navigator' }
+    )
   end
 
+  local url = vim.trim(result.stdout)
   open_or_copy(url, bang)
 end
 
