@@ -9,7 +9,7 @@ Open GitHub URLs for files, blame, commits, PRs, and repos directly from any Neo
 ## 📋 Requirements
 
 - **Neovim 0.10+**
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — installed and authenticated
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) 2.88.0+ — installed and authenticated
 
 ```shell
 brew install gh
